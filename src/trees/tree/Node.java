@@ -1,7 +1,8 @@
 package trees.tree;
 
 import trees.tree.*;
-
+import trees.rectangle.*;
+import java.util.Vector;
 
 public class Node {
     public Node() {
@@ -9,6 +10,16 @@ public class Node {
     }
 
     public Tree tree = null;
+    public boolean isLeafNode = false;
+    public boolean isEndpoint = false;
+    public Node parent = null;
+    public Rectangle mbr = null;
+    public Vector<Node> childrenNodes = null;
+    public Integer index = new Integer(-1);
+
+    public Node splitNode(Node newNode) {
+        return new Node();
+    }
 
 
     // TODO
@@ -18,12 +29,12 @@ public class Node {
 
     // TODO
     public boolean isLeafNode() {
-        return false;
+        return isLeafNode;
     }
 
     // TODO
     public boolean isNonleafNode() {
-        return false;
+        return !isLeafNode;
     }
 
     // TODO

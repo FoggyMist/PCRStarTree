@@ -1,5 +1,7 @@
 package trees.tree;
 
+
+
 public class Tree {
     public Tree() {
 
@@ -12,7 +14,14 @@ public class Tree {
 
     // TODO
     public int height() {
-        return 100;
+        int height = 0;
+        Node node = root;
+        while(node != null) {
+            node = node.childrenNodes.get(0);
+            height++;
+        }
+
+        return height;
     }
 
     // TODO

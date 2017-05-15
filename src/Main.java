@@ -5,11 +5,8 @@ public class Main {
     public static void main(String[] args) {
         Node node = new Node();
         PCRStarNode node2 = new PCRStarNode();
-        //
-        // node.check();
-        // node2.check();
 
-        PCRStarTree tree = new PCRStarTree();
+        PCRStarTree tree = new PCRStarTree(2, 4);
         tree.root = node2;
 
     }
