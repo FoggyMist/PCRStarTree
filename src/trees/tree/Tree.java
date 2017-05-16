@@ -32,4 +32,18 @@ public class Tree {
     public int leafNodeSize = 0;
     // TODO
     public int nonleafNodeSize = 0;
+
+    public void dump() {
+        for(Node node : root.childrenNodes) {
+            dump(node, 1);
+        }
+    }
+
+    public void dump(Node n, int level) {
+        System.out.println("tree-level: " + level +" | " + n);
+
+        for(Node node : n.childrenNodes) {
+            dump(node, level + 1);
+        }
+    }
 }

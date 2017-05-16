@@ -4,19 +4,20 @@ import trees.rectangle.*;
 import java.util.Vector;
 
 public class Node {
+    public static int uniqueRootId = -1;
+
     public Node(Tree t) {
         tree = t;
         childrenNodes = new Vector<Node>(tree.M);
         mbr = new Rectangle(0, 0, 0, 0);
+        index = new Integer(--Node.uniqueRootId);
     }
 
     public Tree tree = null;
-    public boolean isLeafNode = false;
-    public boolean isEndpoint = false;
     public Node parent = null;
     public Rectangle mbr = null;
     public Vector<Node> childrenNodes = null;
-    public Integer index = new Integer(-1);
+    public Integer index;
 
     public Node splitNode(Node newNode) {
         return newNode;
@@ -28,10 +29,12 @@ public class Node {
             System.out.println("too many childrenNodes");
             return;
         }
+        if(childrenNodes.size() == 0) {
+            mbr = new Rectangle(n.mbr);
+        }
         childrenNodes.add(n);
         n.parent = this;
         mbr = Rectangle.enlarge(mbr, n.mbr);
-        isEndpoint = false;
     }
 
     public void addAll(Vector<Node> nodes) {
@@ -47,12 +50,12 @@ public class Node {
 
     // TODO
     public boolean isLeafNode() {
-        return isLeafNode;
+        return (childrenNodes.size() == 0 || childrenNodes.get(0).childrenNodes.size() == 0);
     }
 
     // TODO
     public boolean isNonleafNode() {
-        return !isLeafNode;
+        return !isLeafNode();
     }
 
     // TODO
@@ -83,5 +86,16 @@ public class Node {
     // TODO
     public void addChild(Node newChild, int dunno) {
 
+    }
+
+    public String toString() {
+        String parentId;
+        if(parent == null) {
+            parentId = "isRoot";
+        } else {
+            parentId = parent.index.toString();
+        }
+        return "Node id: " + index + " | in rectangle: " + mbr
+        + " | parent of " + parentId + " | has " + childrenNodes.size() + " children";
     }
 }

@@ -1,5 +1,8 @@
 package trees.rectangle;
 
+import java.text.DecimalFormat;
+import java.math.RoundingMode;
+
 public class Rectangle {
     public Rectangle(double x1, double y1, double x2, double y2) {
         lowerLeftPoint = new double[] {Math.min(x1, x2), Math.min(y1, y2)};
@@ -9,6 +12,16 @@ public class Rectangle {
     public Rectangle() {
         lowerLeftPoint = new double[2];
         upperRightPoint = new double[2];
+    }
+    public Rectangle(Rectangle r) {
+        lowerLeftPoint = new double[] {
+            r.lowerLeftPoint[0],
+            r.lowerLeftPoint[1]
+        };
+        upperRightPoint = new double[] {
+            r.upperRightPoint[0],
+            r.upperRightPoint[1]
+        };
     }
 
     public double[] lowerLeftPoint = null;
@@ -36,14 +49,14 @@ public class Rectangle {
             child.lowerLeftPoint[1]
         );
 
-        result.lowerLeftPoint[0] = Math.max(
-            parent.lowerLeftPoint[0],
-            child.lowerLeftPoint[0]
+        result.upperRightPoint[0] = Math.max(
+            parent.upperRightPoint[0],
+            child.upperRightPoint[0]
         );
 
-        result.lowerLeftPoint[1] = Math.max(
-            parent.lowerLeftPoint[1],
-            child.lowerLeftPoint[1]
+        result.upperRightPoint[1] = Math.max(
+            parent.upperRightPoint[1],
+            child.upperRightPoint[1]
         );
 
         return result;
@@ -51,5 +64,17 @@ public class Rectangle {
 
     public double area() {
         return (Math.abs(upperRightPoint[0] - lowerLeftPoint[0])) * (Math.abs(upperRightPoint[1] - lowerLeftPoint[1]));
+    }
+
+    public String toString() {
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.CEILING);
+
+        return "["
+            + df.format(lowerLeftPoint[0]) + ", "
+            + df.format(lowerLeftPoint[1]) + ", "
+            + df.format(upperRightPoint[0]) + ", "
+            + df.format(upperRightPoint[1])
+        + "]";
     }
 }

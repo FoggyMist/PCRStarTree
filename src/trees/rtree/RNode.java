@@ -121,12 +121,13 @@ public class RNode extends Node {
                 }
             }
 
+            nodes.remove(addingNode);
             // repeat from QS2
         }
 
-        childrenNodes = group1.childrenNodes;
+        childrenNodes.clear();
+        addAll(group1.childrenNodes);
         mbr = group1.mbr;
-        isEndpoint = false;
         return group2;
     }
 }
