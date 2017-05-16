@@ -1,13 +1,12 @@
 import trees.tree.*;
-import trees.pcrstartree.*;
+import trees.rtree.*;
 
 public class Main {
     public static void main(String[] args) {
-        Node node = new Node();
-        PCRStarNode node2 = new PCRStarNode();
 
-        PCRStarTree tree = new PCRStarTree(2, 4);
-        tree.root = node2;
+        RTree tree = new RTree(2, 4);
+        RNode node = new RNode(tree);
+        tree.root = node;
 
     }
 }

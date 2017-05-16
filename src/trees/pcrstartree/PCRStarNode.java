@@ -4,8 +4,8 @@ import trees.rstartree.*;
 import trees.tree.*;
 
 public class PCRStarNode extends RStarNode {
-    public PCRStarNode() {
-        super();
+    public PCRStarNode(Tree t) {
+        super(t);
     }
 
 

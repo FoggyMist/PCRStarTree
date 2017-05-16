@@ -6,13 +6,8 @@ import java.util.Vector;
 
 public class RTree extends Tree {
     public RTree(int m, int M) {
-        super();
-        this.m = m;
-        this.M = M;
+        super(m, M);
     }
-
-    public int m = 2; // lower limit of children in node
-    public int M = 4; // upper limit of children in node
 
     public Vector<Integer> search(Rectangle r) {
         Vector<Integer> results = new Vector<Integer>();
@@ -53,7 +48,7 @@ public class RTree extends Tree {
     }
 
     public void insert(int index, Rectangle r) {
-        Node newNode = new RNode();
+        Node newNode = new RNode(this);
         newNode.index = new Integer(index);
         newNode.mbr = r;
         newNode.isLeafNode = true;
@@ -68,10 +63,8 @@ public class RTree extends Tree {
             leaf.childrenNodes.add(newNode);
         } else { // otherwise invoke splitNode() to obtain (leaf) and (leaf2)
             // containing (newNode) and all the old entries of (leaf)
-            leaf.splitNode(newNode);
+            // Node leaf2 = leaf.splitNode(newNode);
         }
-
-
     }
 
     public Node chooseLeaf(Rectangle r) {

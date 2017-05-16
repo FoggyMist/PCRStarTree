@@ -1,12 +1,13 @@
 package trees.tree;
 
-import trees.tree.*;
 import trees.rectangle.*;
 import java.util.Vector;
 
 public class Node {
-    public Node() {
-
+    public Node(Tree t) {
+        tree = t;
+        childrenNodes = new Vector<Node>(tree.M);
+        mbr = new Rectangle(0, 0, 0, 0);
     }
 
     public Tree tree = null;
@@ -18,9 +19,26 @@ public class Node {
     public Integer index = new Integer(-1);
 
     public Node splitNode(Node newNode) {
-        return new Node();
+        return newNode;
     }
 
+
+    public void add(Node n) {
+        if(childrenNodes.size() == tree.M) {
+            System.out.println("too many childrenNodes");
+            return;
+        }
+        childrenNodes.add(n);
+        n.parent = this;
+        mbr = Rectangle.enlarge(mbr, n.mbr);
+        isEndpoint = false;
+    }
+
+    public void addAll(Vector<Node> nodes) {
+        for(Node node : nodes) {
+            add(node);
+        }
+    }
 
     // TODO
     public Node insertNode(Node insertingNode, int insertDepth) {
@@ -54,12 +72,12 @@ public class Node {
 
     // TODO
     public Node overflowTreatment() {
-        return new Node();
+        return this;
     }
 
     // TODO
     public Node parent() {
-        return new Node();
+        return parent;
     }
 
     // TODO
