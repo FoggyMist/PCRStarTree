@@ -43,6 +43,10 @@ public class Node {
         }
     }
 
+    public void remove(Node node) {
+        childrenNodes.remove(node);
+    }
+
     // TODO
     public Node insertNode(Node insertingNode, int insertDepth) {
         return insertingNode;

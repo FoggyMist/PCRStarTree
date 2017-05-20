@@ -16,7 +16,6 @@ public class Tree {
         root = newRoot;
     }
 
-    // TODO
     public int height() {
         int height = 0;
         Node node = root;

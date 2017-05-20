@@ -38,7 +38,6 @@ public class RTree extends Tree {
                 }
             }
         } else { // S2: if (n) is a leaf
-            // System.out.println("found a leaf!");
             //check all entries (childNode)
             for(Node childNode : n.childrenNodes) {
                 // System.out.println("it has a children");
@@ -181,4 +180,121 @@ public class RTree extends Tree {
         }
     }
 
+    public void delete(int index, Rectangle r) {
+        // D1: [find node containing record]
+        // invoke findLeaf() to locate the leaf node (l) containing (index)
+        Node leaf = findLeaf(index, r, root);
+        // stop if record was not found
+        if(leaf == null) {
+            System.out.println("no record found");
+            return;
+        }
+
+        // D2: [delete record]
+        // remove (index) from (leaf)
+        for(Node child : leaf.childrenNodes) {
+            if(child.index == index) {
+                leaf.remove(child);
+                break;
+            }
+        }
+
+        // D3: [propagate changes]
+        // invoke condenseTree, pasing (leaf)
+        condenseTree(leaf);
+
+        // D4: [shorten tree]
+        // if the root node has only one child after the tree has been adjusted,
+        if(root.childrenNodes.size() == 1) {
+            // make the child the new root
+            Node newRoot = root.childrenNodes.get(0);
+            newRoot.parent = null;
+            root = newRoot;
+        }
+    }
+
+    public Node findLeaf(int index, Rectangle r, Node node) {
+        Node result = null;
+        // FL1: [search subtrees]
+        // if (node) is not a leaf
+        if(!node.isLeafNode()) {
+            // check each entry (child) in (node)
+            for(Node child : node.childrenNodes) {
+                // to deremine if (child.mrb) overlaps (r)
+                if(child.mbr.isOverlapping(r)) {
+                    // for each such enty invoke findLeaf() on the tree
+                    // whose root is pointed to by (child)
+                    Node tmpResult = findLeaf(index, r, child);
+                    // until (index) is found or all etnries have been checked
+                    while (tmpResult != null && !tmpResult.isLeafNode()) {
+                        tmpResult = findLeaf(index, r, tmpResult);
+                    }
+
+                    if(tmpResult != null) {
+                        result = tmpResult;
+                    }
+                }
+            }
+        } else {
+            // FL2: [search leaf node for record]
+            // if (node) is a leaf
+            // check each entry to see if it matches (index)
+            for(Node child : node.childrenNodes) {
+                if(child.index == index) {
+                    // if (index) is found return (node)
+                    return node;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public void condenseTree(Node leaf) {
+        // CT1: [initliazie]
+        // set (node) = (leaf)
+        Node node = leaf;
+        // set (q) the set of eliminated nodes, to be empty
+        Vector<Node> q = new Vector<Node>();
+        // CT2: [find parent entry]
+        // if (node) is the root go to CT6
+        while(node != root) {
+            // otherwise let (p) be the parent of (node)
+            Node p = node.parent;
+            // and let (child) be (node)'s entry in (p)
+            // \DOESNT MAKE SENSE IN OOP/JAVA, ITS JUST NODE = NODE\
+            // CT3: [eliminate under-full node]
+            // if (node) has fewer than (m) entries
+            if(node.childrenNodes.size() < m) {
+                // delete (node) from (p)
+                p.remove(node);
+                // and add (node) to (q) set
+                q.add(node);
+            } else {
+                // CT4: [adjust covering rectangle]
+                // if (node) has not been eliminated, adjust (node.mbr)
+                // to tightly contain all netries in (node)
+                Rectangle tighterMbr = node.childrenNodes.get(0).mbr;
+                for(Node child : node.childrenNodes) {
+                    tighterMbr = Rectangle.enlarge(tighterMbr, child.mbr);
+                }
+
+                node.mbr = tighterMbr;
+            }
+
+            // CT5: [move up one level in tree]
+            // set (node) = (p) and repeat from CT2
+            node = p;
+        }
+
+        // CT6: [re-insert orphaned entries]
+        // re-insert all entries of nodes in set(q)
+        for(Node orphan : q) {
+            if(orphan.index < 1) {
+                System.out.println("reinserting node with negative index in delete procedure!");
+            }
+
+            insert(orphan.index, orphan.mbr);
+        }
+    }
 }
