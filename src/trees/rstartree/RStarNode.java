@@ -14,6 +14,7 @@ public class RStarNode extends RNode {
     @Override
     public RNode splitNode(Node n) {
         childrenNodes.add(n);
+        n.parent = this;
         // S1: invoke chooseSplitAxis() to determine the axis,
         // perpendicular to which the split is preformed
         int splitAxis = chooseSplitAxis();
@@ -146,17 +147,16 @@ public class RStarNode extends RNode {
         }
 
         // S3: distribute the entries into two groups
-        childrenNodes = minimumOverlapDistribution1;
-        for(Node newChild : minimumOverlapDistribution1) {
-            newChild.parent = this;
-        }
         mbr = minimumMbr1;
-        RNode nn = new RStarNode(tree);
-        nn.childrenNodes = minimumOverlapDistribution2;
+        childrenNodes.clear();
         for(Node newChild : minimumOverlapDistribution1) {
-            newChild.parent = nn;
+            add(newChild);
         }
+        RNode nn = new RStarNode(tree);
         nn.mbr = minimumMbr2;
+        for(Node newChild : minimumOverlapDistribution2) {
+            nn.add(newChild);
+        }
         // nn.parent = parent;
         return nn;
     }

@@ -33,9 +33,7 @@ public class Tree {
     public int nonleafNodeSize = 0;
 
     public void dump() {
-        for(Node node : root.childrenNodes) {
-            dump(node, 1);
-        }
+        dump(root, 0);
     }
 
     public void dump(Node n, int level) {

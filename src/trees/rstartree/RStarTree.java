@@ -62,7 +62,14 @@ public class RStarTree extends RTree {
                 } else {
                     node = node.parent;
                     nodeLevel--;
-                    overflowResult = overflowTreatment(nodeLevel, node, overflowResult);
+                    if(node.childrenNodes.size() < M) {
+                        System.out.println("found spot " + node);
+                        System.out.println("for node " + overflowResult);
+                        node.add(overflowResult);
+                        overflowResult = null;
+                    } else {
+                        overflowResult = overflowTreatment(nodeLevel, node, overflowResult);
+                    }
                 }
             }
 
@@ -112,6 +119,7 @@ public class RStarTree extends RTree {
             removedNodes.add(movedNode);
         }
 
+        System.out.println("level " + level  +"; subnodes " + subNodes.size() + "; removedNodes " + removedNodes.size() + "; orig node size " + node.childrenNodes.size());
         node.childrenNodes.clear();
         node.mbr = subNodes.get(0).mbr;
         for(Node child : subNodes) {
