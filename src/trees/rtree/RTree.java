@@ -7,6 +7,10 @@ import java.util.Vector;
 public class RTree extends Tree {
     public RTree(int m, int M) {
         super(m, M);
+        initializeRoot();
+    }
+
+    public void initializeRoot() {
         root = new RNode(this);
     }
 
@@ -54,11 +58,14 @@ public class RTree extends Tree {
     }
 
     public void insert(int index, Rectangle r) {
-
         Node newNode = new RNode(this);
         newNode.index = new Integer(index);
         newNode.mbr = r;
 
+        insert(index, r, newNode);
+    }
+
+    public void insert(int index, Rectangle r, Node newNode) {
         // I1: [find position for new record]
         // invoke chooseLeaf() to select a leaf node in which to place (newNode)
         Node leaf = chooseLeaf(r);
@@ -77,7 +84,6 @@ public class RTree extends Tree {
         // also passing (leaf2) if split was preformed
         // I4: [grow tree taller] \DONE INSIDE adjustTree()\
         adjustTree(leaf, leaf2);
-
     }
 
     public Node chooseLeaf(Rectangle r) {
@@ -85,10 +91,10 @@ public class RTree extends Tree {
         // set (node) to be the root node
         Node node = root;
 
-        return chooseLeaf(node, r);
+        return chooseLeaf(node, r, 0);
     }
 
-    public Node chooseLeaf(Node node, Rectangle r) {
+    public Node chooseLeaf(Node node, Rectangle r, int level) {
         // CL2: [leaf check]
         // if (node) is leaf, return (node)
         if(node.isLeafNode()) {
@@ -97,7 +103,7 @@ public class RTree extends Tree {
             // if (node) is not a leaf, let (candidate) be the entry in (node)
             // whose rectangle (mbr) needs least enlargement to include (r)
             // resolve tries by choosing the netry with the rectangle
-            // of smalles area
+            // of smallest area
 
             double lowestArea = Double.POSITIVE_INFINITY;
             Node choice = null;
@@ -113,7 +119,7 @@ public class RTree extends Tree {
             // CL3: [descend until a leaf is reached]
             // set (node) to be (choice)
 
-            return chooseLeaf(choice, r);
+            return chooseLeaf(choice, r, 0);
         }
     }
 
@@ -141,7 +147,7 @@ public class RTree extends Tree {
             // }
             // n = newMbr;
 
-            // \PROPABLY ALREADY DONE IN splitNode() and node.add()\
+            // \PROBABLY ALREADY DONE IN splitNode() and node.add()\
             // AT4: [propagate node split upward]
             // if (n) has a partner (nn) resulting from an earier split
             if(nn != null) {
@@ -174,10 +180,14 @@ public class RTree extends Tree {
         if(hasSplitRoot
             || (nn != null && n == root)
         ) {
-            root = new RNode(this);
-            root.add(n);
-            root.add(nn);
+            riseTreeLevel(n, nn);
         }
+    }
+
+    public void riseTreeLevel(Node n, Node nn) {
+        root = new RNode(this);
+        root.add(n);
+        root.add(nn);
     }
 
     public void delete(int index, Rectangle r) {

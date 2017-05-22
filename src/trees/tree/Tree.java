@@ -19,7 +19,7 @@ public class Tree {
     public int height() {
         int height = 0;
         Node node = root;
-        while(node != null) {
+        while(node != null && node.childrenNodes.size() > 0) {
             node = node.childrenNodes.get(0);
             height++;
         }

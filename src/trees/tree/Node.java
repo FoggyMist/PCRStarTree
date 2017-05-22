@@ -47,6 +47,20 @@ public class Node {
         childrenNodes.remove(node);
     }
 
+    public double overlap(Rectangle r) {
+        double result = 0;
+        for(Node child : childrenNodes) {
+            if(r != child.mbr) {
+                Rectangle overlappingRect = Rectangle.shrink(child.mbr, r);
+                if(overlappingRect != null) {
+                    result += overlappingRect.area();
+                }
+            }
+        }
+
+        return result;
+    }
+
     // TODO
     public Node insertNode(Node insertingNode, int insertDepth) {
         return insertingNode;

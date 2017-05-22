@@ -62,8 +62,51 @@ public class Rectangle {
         return result;
     }
 
+    public static Rectangle shrink(Rectangle r1, Rectangle r2) {
+        if(!r1.isOverlapping(r2)) {
+            return null;
+        }
+
+        Rectangle result = new Rectangle();
+        result.lowerLeftPoint[0] = Math.max(
+            r1.lowerLeftPoint[0],
+            r2.lowerLeftPoint[0]
+        );
+
+        result.lowerLeftPoint[1] = Math.max(
+            r1.lowerLeftPoint[1],
+            r2.lowerLeftPoint[1]
+        );
+
+        result.upperRightPoint[0] = Math.min(
+            r1.upperRightPoint[0],
+            r2.upperRightPoint[0]
+        );
+
+        result.upperRightPoint[1] = Math.min(
+            r1.upperRightPoint[1],
+            r2.upperRightPoint[1]
+        );
+
+        return result;
+    }
+
     public double area() {
         return (Math.abs(upperRightPoint[0] - lowerLeftPoint[0])) * (Math.abs(upperRightPoint[1] - lowerLeftPoint[1]));
+    }
+
+    public double[] center() {
+        return new double[]{
+            (upperRightPoint[0] - lowerLeftPoint[0]) / 2,
+            (upperRightPoint[1] - lowerLeftPoint[1]) / 2
+        };
+    }
+
+    public static double distance(double[] p1, double[] p2) {
+        return Math.sqrt(
+            (p1[0] - p2[0]) * (p1[0] - p2[0]) +
+            (p1[1] - p2[1]) * (p1[1] - p2[1])
+        );
     }
 
     public String toString() {
