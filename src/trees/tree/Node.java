@@ -114,6 +114,6 @@ public class Node {
             parentId = parent.index.toString();
         }
         return "Node id: " + index + " | in rectangle: " + mbr
-        + " | parent of " + parentId + " | has " + childrenNodes.size() + " children";
+        + " | parent is " + parentId + " | has " + childrenNodes.size() + " children";
     }
 }

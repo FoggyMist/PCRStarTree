@@ -37,6 +37,13 @@ public class RStarTree extends RTree {
         // to find an appropriate (node), in witch to place the (newNode)
         Node node = chooseLeaf(root, r, level);
 
+        // \GO TO THE RIGHT LEVEL\
+        int treeLevel = height() - 1;
+        while(treeLevel > level) {
+            node = node.parent;
+            treeLevel--;
+        }
+
         // I2: if (node) has less than (M) entries, accomodate (newNode) in (node)
         if(node.childrenNodes.size() < M) {
             node.add(newNode);
@@ -44,31 +51,23 @@ public class RStarTree extends RTree {
         } else {
             // if (node) has (M) entries, invoke overflowTreatment()
             // with the level of (node) as parameter [for reinsertion or split]
-            int nodeLevel = 0;
-            Node nodeParent = node.parent;
-            while(nodeParent != null) {
-                nodeParent = nodeParent.parent;
-                nodeLevel++;
-            }
 
-            Node overflowResult = overflowTreatment(nodeLevel, node, newNode);
+            Node overflowResult = overflowTreatment(level, node, newNode);
             // I3: if overflowTreatment() was called and split was performed,
             // propagate overflowTreatment() upwards if necessary,
             // if overflowTreatment() cause a split of the root, create new root
-            while(overflowResult != null && nodeLevel >= 0) {
-                if(nodeLevel == 0) {
+            while(overflowResult != null && level >= 0) {
+                if(level == 0) {
                     riseTreeLevel(node, overflowResult);
                     overflowResult = null;
                 } else {
                     node = node.parent;
-                    nodeLevel--;
+                    level--;
                     if(node.childrenNodes.size() < M) {
-                        System.out.println("found spot " + node);
-                        System.out.println("for node " + overflowResult);
                         node.add(overflowResult);
                         overflowResult = null;
                     } else {
-                        overflowResult = overflowTreatment(nodeLevel, node, overflowResult);
+                        overflowResult = overflowTreatment(level, node, overflowResult);
                     }
                 }
             }
@@ -81,7 +80,6 @@ public class RStarTree extends RTree {
 
     public Node overflowTreatment(int level, Node node, Node newNode) {
         Node nn = null;
-        System.out.println(level + " " + overflowsDone);
         // OT1: if the level is not the root level
         // and this is the first call of overflowTreatment() in the given level
         // during the insertion of one data rectangle
@@ -119,7 +117,6 @@ public class RStarTree extends RTree {
             removedNodes.add(movedNode);
         }
 
-        System.out.println("level " + level  +"; subnodes " + subNodes.size() + "; removedNodes " + removedNodes.size() + "; orig node size " + node.childrenNodes.size());
         node.childrenNodes.clear();
         node.mbr = subNodes.get(0).mbr;
         for(Node child : subNodes) {
