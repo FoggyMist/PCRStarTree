@@ -6,6 +6,8 @@ public class Tree {
     public Tree(int m, int M) {
         this.m = m;
         this.M = M;
+        leafNodeSize = M;
+        nonleafNodeSize = M;
     }
 
     public int m = 2; // lower limit of children in node

@@ -37,6 +37,14 @@ public class Node {
         mbr = Rectangle.enlarge(mbr, n.mbr);
     }
 
+    public void forceAdd(Node n) {
+        if(childrenNodes.size() == 0) {
+            mbr = new Rectangle(n.mbr);
+        }
+        childrenNodes.add(n);
+        n.parent = this;
+        mbr = Rectangle.enlarge(mbr, n.mbr);
+    }
     public void addAll(Vector<Node> nodes) {
         for(Node node : nodes) {
             add(node);
@@ -61,6 +69,21 @@ public class Node {
         return result;
     }
 
+    public int height() {
+        int height = 0;
+        Node node = this;
+        while(node != null && node.childrenNodes.size() > 0) {
+            node = node.childrenNodes.get(0);
+            height++;
+        }
+
+        return height;
+    }
+
+    public void condenseTree() {
+        
+    }
+
     // TODO
     public Node insertNode(Node insertingNode, int insertDepth) {
         return insertingNode;
@@ -77,8 +100,8 @@ public class Node {
     }
 
     // TODO
-    public Node chooseSubTree(Node insertingNode) {
-        return insertingNode;
+    public Node chooseSubTree(Rectangle insertingNode) {
+        return null;
     }
 
     // TODO

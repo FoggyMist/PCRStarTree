@@ -17,6 +17,8 @@ public class RStarTree extends RTree {
 
     @Override
     public void insert(int index, Rectangle r) {
+        // System.out.println("--- new insert started ---");
+        // System.out.println("inserting id: " + index +"; size: " + r);
         Node newNode = new RStarNode(this);
         newNode.index = new Integer(index);
         newNode.mbr = r;
@@ -33,9 +35,11 @@ public class RStarTree extends RTree {
     Vector<Boolean> overflowsDone;
 
     public void insert(int index, Rectangle r, Node newNode, int level) {
+        // System.out.println(level + " insert(" + index +";" + r +";" + newNode +";" + level);
         // I1: invoke chooseLeaf(), with the level as a parameter,
         // to find an appropriate (node), in witch to place the (newNode)
         Node node = chooseLeaf(root, r, level);
+        // System.out.println("choosen leaf: " + node);
 
         // \GO TO THE RIGHT LEVEL\
         int treeLevel = height() - 1;
@@ -43,6 +47,9 @@ public class RStarTree extends RTree {
             node = node.parent;
             treeLevel--;
         }
+
+        // System.out.println("rolled up the choosen leaf to: " + node);
+
 
         // I2: if (node) has less than (M) entries, accomodate (newNode) in (node)
         if(node.childrenNodes.size() < M) {
@@ -57,7 +64,7 @@ public class RStarTree extends RTree {
             // propagate overflowTreatment() upwards if necessary,
             // if overflowTreatment() cause a split of the root, create new root
             while(overflowResult != null && level >= 0) {
-                if(level == 0) {
+                if(node.parent == null) {
                     riseTreeLevel(node, overflowResult);
                     overflowResult = null;
                 } else {

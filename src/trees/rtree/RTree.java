@@ -301,6 +301,7 @@ public class RTree extends Tree {
         // re-insert all entries of nodes in set(q)
         for(Node orphan : q) {
             if(orphan.index < 1) {
+                // r*tree uses this method and propably requires level to be calculated
                 System.out.println("reinserting node with negative index in delete procedure!");
             }
 
