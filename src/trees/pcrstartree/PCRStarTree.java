@@ -3,6 +3,7 @@ package trees.pcrstartree;
 import trees.rstartree.*;
 import trees.rectangle.*;
 import trees.tree.*;
+import java.util.*;
 
 public class PCRStarTree {
     public PCRStarTree(int m, int M) {
@@ -55,6 +56,14 @@ public class PCRStarTree {
         // root.add(node);
     }
 
+    public PCRStarNode search(Rectangle r) {
+        return root.search(r);
+    }
+
+    public Vector<Integer> wideSearch(Rectangle r) {
+        return root.wideSearch(r);
+    }
+
     public void dump() {
         dump(root, 0);
     }
@@ -65,5 +74,15 @@ public class PCRStarTree {
         for(PCRStarNode node : n.childrenNodes) {
             dump(node, level + 1);
         }
+    }
+
+    public String toJSON() {
+        String result = "";
+
+        result += "{";
+        result += "root: " + root.toJSON();
+        result += "}";
+
+        return result;
     }
 }

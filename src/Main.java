@@ -39,13 +39,32 @@ public class Main {
         // tree.delete(storedIndex, storedRect);
         // System.out.println("removing: " + storedIndex + " | " + storedRect);
         tree.dump();
+        // System.out.println(tree.toJSON());
 
-        // Vector<Integer> results = tree.search(new Rectangle(-10, -10, 10, 10));
 
-        // System.out.println("Ids found:");
-        // for(Integer a : results) {
-        //     System.out.println(a);
-        // }
+        System.out.println("leaf search:");
+        PCRStarNode leafResults = tree.search(new Rectangle(-10, -10, 10, 10));
+        if(leafResults == null) {
+            System.out.println("no results found");
+        } else {
+            System.out.println("Ids found:");
+
+            for(PCRStarNode a : leafResults.childrenNodes) {
+                System.out.println(a.index);
+            }
+
+        }
+
+        System.out.println("wide search:");
+        Vector<Integer> wideResults = tree.wideSearch(new Rectangle(-10, -10, 10, 10));
+        if(wideResults.size() == 0) {
+            System.out.println("no results found");
+        } else {
+            System.out.println("Ids found:");
+            for(Integer a : wideResults) {
+                System.out.println(a);
+            }
+        }
 
     }
 }

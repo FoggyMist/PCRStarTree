@@ -1,0 +1,97 @@
+<canvas
+    id="graph-canvas"
+    style = "
+        border:     solid black 3px;
+        margin:     auto;
+        display:    block;
+    "
+></canvas>
+
+<script type="text/javascript" src="data.js"></script>
+<script>
+
+// const variables
+
+let canvas = document.getElementById("graph-canvas");
+let c = canvas.getContext("2d");
+let canvProps = {
+      origWidth:        240
+    , origHeight:       240
+    , scale:            3.6
+    , borderWidth:      1
+    , borderOpacity:    0.6
+};
+
+// p is for treeParser
+let p = {
+      root:     "root"
+    , points:   "mbr"
+    , children: "nodes"
+};
+
+function s(value) {
+    return value * canvProps.scale;
+}
+
+// recalculate variables
+
+canvProps.width     = s(canvProps.origWidth);
+canvProps.height    = s(canvProps.origHeight);
+
+canvas.setAttribute("width", canvProps.width);
+canvas.setAttribute("height", canvProps.height);
+
+c.translate(s(100), s(140));
+c.rotate(-Math.PI / 2);
+// drawing functions
+
+
+// s is for Scale
+
+function getTreeHeight(tree) {
+    let height = 1;
+    let node = tree[p.root];
+    while(node[p.children].length > 0) {
+        node = node[p.children][0];
+        height++;
+    }
+
+    return height;
+}
+
+let height = getTreeHeight(data);
+
+function drawRectangle(rectangle, level) {
+    let childrenNodes = rectangle[p.children];
+    let loopEnd = childrenNodes.length;
+
+    for(let a = 0; a < loopEnd; a++) {
+        drawRectangle(childrenNodes[a], level + 1);
+    }
+
+    c.save();
+    c.lineWidth = s(height - level) * canvProps.borderWidth;
+    c.strokeStyle = "hsla(" + ((level / height) * 360) + ", 100%, 30%, " + canvProps.borderOpacity +")";
+    c.beginPath();
+
+    let point = rectangle[p.points][0];
+    c.moveTo(s(point[0]), s(point[1]));
+
+    for(let a = 1; a < 4; a ++) {
+        point = rectangle[p.points][a];
+        c.lineTo(s(point[0]), s(point[1]));
+    }
+
+    c.closePath();
+    c.stroke();
+
+    c.restore();
+}
+
+function drawTree(tree) {
+    drawRectangle(tree[p.root], 0);
+}
+
+drawTree(data);
+
+</script>

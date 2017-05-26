@@ -388,6 +388,47 @@ public class PCRStarNode {
         return splitAxis;
     }
 
+    public PCRStarNode search(Rectangle r) {
+        if(this.mbr.isOverlapping(r)) {
+            if(this.isLeafNode()) {
+                return this;
+            }
+
+            for(PCRStarNode child : childrenNodes) {
+                PCRStarNode nodeFound = child.search(r);
+                if(nodeFound != null) {
+                    return nodeFound;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Vector<Integer> wideSearch(Rectangle r) {
+        Vector<Integer> results = new Vector<Integer>();
+
+        if(this.mbr.isOverlapping(r)) {
+            if(this.isLeafNode()) {
+                for(PCRStarNode child : childrenNodes) {
+                    if(child.mbr.isOverlapping(r)) {
+                        results.add(child.index);
+                    }
+                }
+
+                return results;
+            }
+
+            for(PCRStarNode child : childrenNodes) {
+                if(child.mbr.isOverlapping(r)) {
+                    results.addAll(child.wideSearch(r));
+                }
+            }
+        }
+
+        return results;
+    }
+
     public String toString() {
         String parentId;
         if(parent == null) {
@@ -397,5 +438,19 @@ public class PCRStarNode {
         }
         return "Node id: " + index + " | in rectangle: " + mbr
         + " | parent is " + parentId + " | has " + childrenNodes.size() + " children";
+    }
+
+    public String toJSON() {
+        String result = "";
+
+        result += "{";
+        result += "mbr: " + mbr.toJSON() + ",";
+        result += "nodes: [";
+        for(PCRStarNode child : childrenNodes) {
+            result += child.toJSON() + ",";
+        }
+        result += "]}";
+
+        return result;
     }
 }

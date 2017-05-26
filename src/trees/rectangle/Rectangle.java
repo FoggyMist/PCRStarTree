@@ -120,4 +120,19 @@ public class Rectangle {
             + df.format(upperRightPoint[1])
         + "]";
     }
+
+    public String toJSON() {
+        String result = "";
+
+        result += "[";
+
+        result += "[" + lowerLeftPoint[0] + "," + lowerLeftPoint[1] + "],";
+        result += "[" + upperRightPoint[0] + "," + lowerLeftPoint[1] + "],";
+        result += "[" + upperRightPoint[0] + "," + upperRightPoint[1] + "],";
+        result += "[" + lowerLeftPoint[0] + "," + upperRightPoint[1] + "]";
+
+        result += "]";
+
+        return result;
+    }
 }
