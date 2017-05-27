@@ -45,4 +45,14 @@ public class Tree {
             dump(node, level + 1);
         }
     }
+
+    public String toJSON() {
+        String result = "";
+
+        result += "{";
+        result += "root: " + root.toJSON();
+        result += "}";
+
+        return result;
+    }
 }

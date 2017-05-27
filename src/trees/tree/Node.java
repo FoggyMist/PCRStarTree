@@ -81,7 +81,7 @@ public class Node {
     }
 
     public void condenseTree() {
-        
+
     }
 
     // TODO
@@ -138,5 +138,19 @@ public class Node {
         }
         return "Node id: " + index + " | in rectangle: " + mbr
         + " | parent is " + parentId + " | has " + childrenNodes.size() + " children";
+    }
+
+    public String toJSON() {
+        String result = "";
+
+        result += "{";
+        result += "mbr: " + mbr.toJSON() + ",";
+        result += "nodes: [";
+        for(Node child : childrenNodes) {
+            result += child.toJSON() + ",";
+        }
+        result += "]}";
+
+        return result;
     }
 }

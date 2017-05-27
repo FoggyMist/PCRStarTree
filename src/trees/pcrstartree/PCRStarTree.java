@@ -9,7 +9,7 @@ public class PCRStarTree {
     public PCRStarTree(int m, int M) {
         this.m = m;
         this.M = M;
-        leafNodeSize = M;
+        leafNodeSize = M * 2;
         nonleafNodeSize = M;
         root = new PCRStarNode(this);
     }
@@ -49,9 +49,32 @@ public class PCRStarTree {
 
     public void addRoot(PCRStarNode node) {
         System.out.println("new root!");
+
+
+        for(PCRStarNode child : node.childrenNodes) {
+            root.forceAdd(child);
+        }
+
+        System.out.println("root childrenNodes size: " + root.childrenNodes.size());
+
+        int splitAxis = root.chooseSplitAxis();
+        root.sortByDimension(splitAxis);
+
+        PCRStarNode subNode = new PCRStarNode(this);
+        int halfSize = root.childrenNodes.size();
+        for(int a = root.childrenNodes.size(); a > halfSize; a--) {
+            PCRStarNode transferNode = root.childrenNodes.get(a);
+            root.remove(transferNode);
+            subNode.add(transferNode);
+        }
+
+        root.condenseTree();
+        subNode.condenseTree();
+
         PCRStarNode newRoot = new PCRStarNode(this);
+        newRoot.mbr = new Rectangle(root.mbr);
         newRoot.add(root);
-        newRoot.add(node);
+        newRoot.add(subNode);
         root = newRoot;
         // root.add(node);
     }
@@ -62,6 +85,31 @@ public class PCRStarTree {
 
     public Vector<Integer> wideSearch(Rectangle r) {
         return root.wideSearch(r);
+    }
+
+    public void delete(Rectangle r) {
+        PCRStarNode deletingNode = root.search(r);
+        System.out.println("found node to delete: " + deletingNode);
+        if(deletingNode != null) {
+            int childDepth = height() - 1; // -1 because height takes leaves into account
+            while(deletingNode != null && deletingNode != root) {
+                PCRStarNode parent = deletingNode.parent;
+                parent.remove(deletingNode);
+                parent.condenseTree();
+                if(deletingNode.childrenNodes.size() > 0) {
+                    for(int i = 0; i < deletingNode.childrenNodes.size(); i++) {
+                        root.insertNode(deletingNode.childrenNodes.get(i), childDepth);
+                    }
+                }
+
+                deletingNode = null;
+                if(parent.childrenNodes.size() == 0 && deletingNode != root) {
+                    deletingNode = parent;
+                }
+
+                childDepth--;
+            }
+        }
     }
 
     public void dump() {

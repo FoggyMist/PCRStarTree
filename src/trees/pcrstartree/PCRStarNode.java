@@ -7,6 +7,7 @@ import java.util.*;
 
 
 public class PCRStarNode {
+    public static Random rng = new Random();
 
     public static int uniqueRootId = -1;
 
@@ -27,30 +28,24 @@ public class PCRStarNode {
     int depth = 0;
 
     public PCRStarNode insertNode(PCRStarNode insertingNode, int insertDepth) {
-        System.out.println("!!!!!!!");
-
         depth = 0;
         PCRStarNode currentNode = this;
-        System.out.println(depth + " | " + insertDepth);
+        // System.out.println(depth + " | " + insertDepth);
 
         while(depth < insertDepth) {
+            // System.out.println(depth + " | " + insertDepth);
             currentNode = currentNode.chooseSubTree(insertingNode.mbr);
             depth = depth + 1;
         }
 
-        System.out.println("target for " + insertingNode.index + " is " + currentNode);
-
         while(insertingNode != null && currentNode != null) {
-            System.out.println("whille");
             currentNode.forceAdd(insertingNode);
             if(
                 (currentNode.isLeafNode() && currentNode.childrenNodes.size() > tree.leafNodeSize)
                 || (currentNode.isNonleafNode() && currentNode.childrenNodes.size() > tree.nonleafNodeSize)
             ) {
-                System.out.println("overflowTreatment");
                 insertingNode = currentNode.overflowTreatment();
             } else {
-                System.out.println("null");
                 insertingNode = null;
             }
 
@@ -81,8 +76,17 @@ public class PCRStarNode {
 
     public PCRStarNode split() {
         PCRStarNode splitNode = new PCRStarNode(tree);
+        System.out.println("Split:");
         int axis = chooseSplitAxis();
         int splitIndex = chooseSplitIndexInt(axis);
+        System.out.println("size " + childrenNodes.size());
+
+
+        // for(int a = childrenNodes.size() - 1; a >= splitIndex; a--) {
+        //     PCRStarNode transferNode = childrenNodes.get(splitIndex);
+        //     childrenNodes.remove(transferNode);
+        //     splitNode.add(transferNode);
+        // }
         while(splitIndex <  childrenNodes.size()) {
             PCRStarNode transferNode = childrenNodes.get(splitIndex);
             childrenNodes.remove(transferNode);
@@ -117,6 +121,76 @@ public class PCRStarNode {
         }
     }
 
+    public int chooseSplitAxis() {
+        // CSA1: for each axis
+        double lowestS = Double.POSITIVE_INFINITY;
+        int splitAxis = -1;
+        // System.out.println("---");
+        for(int axis = 0; axis < 2; axis++) { // this implementation supports only 2d rectangles
+            // sort the entries by the lower, then by upper value of thier rectangles
+            // and determine all distributions as described:
+            // margin-value = margin[mbr(firstGroup)] + margin[mbr(secondGroup)]
+
+            // System.out.println("before sorting:");
+            // for(PCRStarNode child: childrenNodes) {
+            //     System.out.println(child);
+            // }
+
+            sortByDimension(axis);
+
+            // System.out.println("after sorting:");
+            // for(PCRStarNode child: childrenNodes) {
+            //     System.out.println(child);
+            // }
+
+            // compute (s), the sum of all margin-values of different distributions
+            double s = 0;
+            Vector<PCRStarNode> firstGroup = new Vector<PCRStarNode>(tree.M - 1);
+            Vector<PCRStarNode> secondGroup = new Vector<PCRStarNode>(tree.M - 1);
+            secondGroup.addAll(childrenNodes);
+            for(int a = 0; a < tree.m; a++) {
+                PCRStarNode transferNode = childrenNodes.get(a);
+                firstGroup.add(transferNode);
+                secondGroup.remove(transferNode);
+            }
+
+            // firstGroup.add(childrenNodes.get(0));
+            // secondGroup.addAll(childrenNodes);
+            // secondGroup.remove(childrenNodes.get(0));
+
+            int loopEnd = childrenNodes.size() - tree.m;
+            for(int a = tree.m; a < loopEnd; a++) {
+                Rectangle firstMbr = new Rectangle(firstGroup.get(0).mbr);
+                Rectangle secondMbr = new Rectangle(secondGroup.get(0).mbr);
+                for(PCRStarNode firstGroupNode : firstGroup) {
+                    firstMbr = Rectangle.enlarge(firstGroupNode.mbr, firstMbr);
+                }
+                for(PCRStarNode secondGroupNode : secondGroup) {
+                    secondMbr = Rectangle.enlarge(secondGroupNode.mbr, secondMbr);
+                }
+
+                double margin = mbr.area() - firstMbr.area() - secondMbr.area();
+                s += margin;
+                // move to next distribution,
+                // take first node from second group and transfer it to first
+                PCRStarNode n = secondGroup.get(0);
+                secondGroup.remove(n);
+                firstGroup.add(n);
+            }
+
+            // CSA2: choose the axis with the minimum (s) as (splitAxis)
+            if(s < lowestS) {
+                lowestS = s;
+                splitAxis = axis;
+            }
+        }
+
+        sortByDimension(splitAxis);
+
+        System.out.println("splitAxis " + splitAxis);
+        return splitAxis;
+    }
+
     public int chooseSplitIndexInt(int axis) {
         // CSI1: along the chosen split axis, choose the distribution
         // with the minimum overlap-value, resolve ties by choosing the distribution
@@ -138,8 +212,8 @@ public class PCRStarNode {
 
         int loopEnd = childrenNodes.size() - tree.m;
         for(int a = tree.m; a < loopEnd; a++) {
-            Rectangle firstMbr = firstGroup.get(0).mbr;
-            Rectangle secondMbr = secondGroup.get(0).mbr;
+            Rectangle firstMbr = new Rectangle(firstGroup.get(0).mbr);
+            Rectangle secondMbr = new Rectangle(secondGroup.get(0).mbr);
             for(PCRStarNode firstGroupNode : firstGroup) {
                 firstMbr = Rectangle.enlarge(firstGroupNode.mbr, firstMbr);
             }
@@ -177,6 +251,7 @@ public class PCRStarNode {
             firstGroup.add(n);
         }
 
+        System.out.println("splitIndex " + splitIndex);
         return splitIndex;
     }
 
@@ -244,7 +319,7 @@ public class PCRStarNode {
 
     public void condenseTree() {
         if(childrenNodes.size() > 0) {
-            Rectangle newMbr = childrenNodes.get(0).mbr;
+            Rectangle newMbr = new Rectangle(childrenNodes.get(0).mbr);
             for(PCRStarNode child : childrenNodes) {
                 newMbr = Rectangle.enlarge(newMbr, child.mbr);
             }
@@ -267,9 +342,16 @@ public class PCRStarNode {
     }
 
     public void add(PCRStarNode n) {
-        if(childrenNodes.size() == tree.M) {
-            System.out.println("too many childrenNodes");
-            return;
+        if(isLeafNode()) {
+            if(childrenNodes.size() == tree.leafNodeSize) {
+                System.out.println("too many childrenNodes");
+                return;
+            }
+        } else {
+            if(childrenNodes.size() == tree.nonleafNodeSize) {
+                System.out.println("too many childrenNodes");
+                return;
+            }
         }
 
         forceAdd(n);
@@ -327,65 +409,22 @@ public class PCRStarNode {
         return !isLeafNode();
     }
 
-
-    public int chooseSplitAxis() {
-        // CSA1: for each axis
-        double lowestS = Double.POSITIVE_INFINITY;
-        int splitAxis = -1;
-        for(int axis = 0; axis < 2; axis++) { // this implementation supports only 2d rectangles
-            // sort the entries by the lower, then by upper value of thier rectangles
-            // and determine all distributions as described:
-            // margin-value = margin[mbr(firstGroup)] + margin[mbr(secondGroup)]
-            int theAxis = axis;
-            Collections.sort(childrenNodes, (PCRStarNode n1, PCRStarNode n2) -> {
-                if(n1.mbr.lowerLeftPoint[theAxis] < n2.mbr.lowerLeftPoint[theAxis]) {
+    public void sortByDimension(int dimension) {
+        Collections.sort(childrenNodes, (PCRStarNode n1, PCRStarNode n2) -> {
+            if(n1.mbr.lowerLeftPoint[dimension] < n2.mbr.lowerLeftPoint[dimension]) {
+                return -1;
+            } else if(n1.mbr.lowerLeftPoint[dimension] > n2.mbr.lowerLeftPoint[dimension]) {
+                return 1;
+            } else { // n1 lower == n2 lower, then compare upper
+                if(n1.mbr.upperRightPoint[dimension] < n2.mbr.upperRightPoint[dimension]) {
                     return -1;
-                } else if(n1.mbr.lowerLeftPoint[theAxis] > n2.mbr.lowerLeftPoint[theAxis]) {
+                } else if(n1.mbr.upperRightPoint[dimension] > n2.mbr.upperRightPoint[dimension]) {
                     return 1;
-                } else { // n1 lower == n2 lower, then compare upper
-                    if(n1.mbr.upperRightPoint[theAxis] < n2.mbr.upperRightPoint[theAxis]) {
-                        return -1;
-                    } else if(n1.mbr.upperRightPoint[theAxis] > n2.mbr.upperRightPoint[theAxis]) {
-                        return 1;
-                     } else { // n1 == n2
-                        return 0;
-                    }
+                 } else { // n1 == n2
+                    return 0;
                 }
-            });
-            // compute (s), the sum of all margin-values of different distributions
-            double s = 0;
-            Vector<PCRStarNode> firstGroup = new Vector<PCRStarNode>(tree.M - 1);
-            Vector<PCRStarNode> secondGroup = new Vector<PCRStarNode>(tree.M - 1);
-            firstGroup.add(childrenNodes.get(0));
-            secondGroup.addAll(childrenNodes);
-            secondGroup.remove(childrenNodes.get(0));
-            for(int a = 1; a < childrenNodes.size(); a++) {
-                Rectangle firstMbr = firstGroup.get(0).mbr;
-                Rectangle secondMbr = secondGroup.get(0).mbr;
-                for(PCRStarNode firstGroupNode : firstGroup) {
-                    firstMbr = Rectangle.enlarge(firstGroupNode.mbr, firstMbr);
-                }
-                for(PCRStarNode secondGroupNode : secondGroup) {
-                    secondMbr = Rectangle.enlarge(secondGroupNode.mbr, secondMbr);
-                }
-
-                double margin = mbr.area() - firstMbr.area() - secondMbr.area();
-                s += margin;
-                // move to next distribution,
-                // take first node from second group and transfer it to first
-                PCRStarNode n = secondGroup.get(0);
-                secondGroup.remove(n);
-                firstGroup.add(n);
             }
-
-            // CSA2: choose the axis with the minimum (s) as (splitAxis)
-            if(s < lowestS) {
-                lowestS = s;
-                splitAxis = axis;
-            }
-        }
-
-        return splitAxis;
+        });
     }
 
     public PCRStarNode search(Rectangle r) {

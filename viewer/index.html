@@ -1,24 +1,51 @@
-<canvas
-    id="graph-canvas"
+<div id = "canvas-holder"
     style = "
         border:     solid black 3px;
         margin:     auto;
         display:    block;
+        position:   relative;
+    "
+>
+<canvas
+    id="leaf-canvas"
+    style ="
+        top:        0;
+        left:       0;
+        position:   absolute;
+    "
+></canvas>
+<canvas
+    id="node-canvas"
+    style ="
+        top:        0;
+        left:       0;
+        position:   absolute;
     "
 ></canvas>
 
+</div>
+
 <script type="text/javascript" src="data.js"></script>
+<script type="text/javascript" src="data2.js"></script>
 <script>
 
 // const variables
 
-let canvas = document.getElementById("graph-canvas");
-let c = canvas.getContext("2d");
+let holder = document.getElementById("canvas-holder");
+let canvas = [
+      document.getElementById("leaf-canvas")
+    , document.getElementById("node-canvas")
+];
+let ctx = [
+      canvas[0].getContext("2d")
+    , canvas[1].getContext("2d")
+];
+
 let canvProps = {
-      origWidth:        240
-    , origHeight:       240
+      origWidth:        210
+    , origHeight:       210
     , scale:            3.6
-    , borderWidth:      1
+    , borderWidth:      0.4
     , borderOpacity:    0.6
 };
 
@@ -38,11 +65,15 @@ function s(value) {
 canvProps.width     = s(canvProps.origWidth);
 canvProps.height    = s(canvProps.origHeight);
 
-canvas.setAttribute("width", canvProps.width);
-canvas.setAttribute("height", canvProps.height);
+holder.style.width = canvProps.width;
+holder.style.height = canvProps.height;
 
-c.translate(s(100), s(140));
-c.rotate(-Math.PI / 2);
+for(let a = 0; a < canvas.length; a++) {
+    canvas[a].setAttribute("width", canvProps.width);
+    canvas[a].setAttribute("height", canvProps.height);
+    ctx[a].translate(s(105), s(105));
+    ctx[a].rotate(-Math.PI / 2);
+}
 // drawing functions
 
 
@@ -61,17 +92,44 @@ function getTreeHeight(tree) {
 
 let height = getTreeHeight(data);
 
-function drawRectangle(rectangle, level) {
+function drawLeaf(rectangle, level) {
+    let c = ctx[0];
+    c.save();
+    c.fillStyle = "hsla(1, 100%, 0%, 1)";
+    c.beginPath();
+
+    let point = rectangle[p.points][0];
+    c.moveTo(s(point[0]), s(point[1]));
+
+    for(let a = 1; a < 4; a ++) {
+        point = rectangle[p.points][a];
+        c.lineTo(s(point[0]), s(point[1]));
+    }
+
+    c.closePath();
+    c.fill();
+
+    c.restore();
+
+}
+
+function drawNode(rectangle, level) {
     let childrenNodes = rectangle[p.children];
     let loopEnd = childrenNodes.length;
 
-    for(let a = 0; a < loopEnd; a++) {
-        drawRectangle(childrenNodes[a], level + 1);
+    if(loopEnd == 0) {
+        drawLeaf(rectangle, level);
+        return;
     }
 
+    for(let a = 0; a < loopEnd; a++) {
+        drawNode(childrenNodes[a], level + 1);
+    }
+
+    let c = ctx[1];
     c.save();
     c.lineWidth = s(height - level) * canvProps.borderWidth;
-    c.strokeStyle = "hsla(" + ((level / height) * 360) + ", 100%, 30%, " + canvProps.borderOpacity +")";
+    c.strokeStyle = "hsla(" + ((level / (height - 1)) * 360) + ", 100%, 40%, " + canvProps.borderOpacity +")";
     c.beginPath();
 
     let point = rectangle[p.points][0];
@@ -84,12 +142,14 @@ function drawRectangle(rectangle, level) {
 
     c.closePath();
     c.stroke();
-
     c.restore();
 }
 
 function drawTree(tree) {
-    drawRectangle(tree[p.root], 0);
+    for(let a = 0; a < 2; a++) {
+        ctx[a].clearRect(-canvProps.width, -canvProps.height, 2*canvProps.width, 2*canvProps.height)
+    }
+    drawNode(tree[p.root], 0);
 }
 
 drawTree(data);
