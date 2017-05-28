@@ -82,12 +82,7 @@ public class PCRStarNode {
         System.out.println("size " + childrenNodes.size());
 
 
-        // for(int a = childrenNodes.size() - 1; a >= splitIndex; a--) {
-        //     PCRStarNode transferNode = childrenNodes.get(splitIndex);
-        //     childrenNodes.remove(transferNode);
-        //     splitNode.add(transferNode);
-        // }
-        while(splitIndex <  childrenNodes.size()) {
+        for(int a = childrenNodes.size() - 1; a >= splitIndex; a--) {
             PCRStarNode transferNode = childrenNodes.get(splitIndex);
             childrenNodes.remove(transferNode);
             splitNode.add(transferNode);

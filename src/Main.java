@@ -19,7 +19,7 @@ public class Main {
         Rectangle storedRect = null;
 
         // tree.insert(1, new Rectangle(1,1,3,3));
-        for(int a = 1; a <= 1300; a++) {
+        for(int a = 1; a <= 80; a++) {
             double x = ThreadLocalRandom.current().nextDouble(-100, 100);
             double y = ThreadLocalRandom.current().nextDouble(-100, 100);
             double height = ThreadLocalRandom.current().nextDouble(1, 2);
@@ -63,7 +63,7 @@ public class Main {
         }
 
         // tree.delete(storedRect);
-        // tree.dump();
+        tree.dump();
         // System.out.println("removing: " + storedIndex + " | " + storedRect);
 
         try{

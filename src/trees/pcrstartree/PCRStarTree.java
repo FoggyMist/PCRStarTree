@@ -31,9 +31,7 @@ public class PCRStarTree {
         return height;
     }
 
-    // TODO
     public int leafNodeSize = 0;
-    // TODO
     public int nonleafNodeSize = 0;
 
     public void insert(int index, Rectangle r) {
@@ -50,33 +48,11 @@ public class PCRStarTree {
     public void addRoot(PCRStarNode node) {
         System.out.println("new root!");
 
-
-        for(PCRStarNode child : node.childrenNodes) {
-            root.forceAdd(child);
-        }
-
-        System.out.println("root childrenNodes size: " + root.childrenNodes.size());
-
-        int splitAxis = root.chooseSplitAxis();
-        root.sortByDimension(splitAxis);
-
-        PCRStarNode subNode = new PCRStarNode(this);
-        int halfSize = root.childrenNodes.size();
-        for(int a = root.childrenNodes.size(); a > halfSize; a--) {
-            PCRStarNode transferNode = root.childrenNodes.get(a);
-            root.remove(transferNode);
-            subNode.add(transferNode);
-        }
-
-        root.condenseTree();
-        subNode.condenseTree();
-
         PCRStarNode newRoot = new PCRStarNode(this);
         newRoot.mbr = new Rectangle(root.mbr);
         newRoot.add(root);
-        newRoot.add(subNode);
+        newRoot.add(node);
         root = newRoot;
-        // root.add(node);
     }
 
     public PCRStarNode search(Rectangle r) {
