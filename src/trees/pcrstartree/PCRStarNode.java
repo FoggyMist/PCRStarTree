@@ -222,7 +222,7 @@ public class PCRStarNode {
             }
 
             double overlap = 0;
-            // overlap-value = area[mbr(firstGroup) ∩ mbr(secondGroup)]
+            // overlap-value = area[mbr(firstGroup) \intersection\ mbr(secondGroup)]
             Rectangle intersection = Rectangle.shrink(firstMbr, secondMbr);
             if(intersection != null) {
                 overlap = intersection.area();
