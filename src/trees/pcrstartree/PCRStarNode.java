@@ -24,6 +24,9 @@ public class PCRStarNode {
     public Vector<PCRStarNode> childrenNodes = null;
     public Integer index;
 
+    public int aggregateNumberOfLeafNodes = 0;
+    public int aggregateNumberOfNonLeafNodes = 0;
+
 
     int depth = 0;
 
@@ -76,15 +79,16 @@ public class PCRStarNode {
 
     public PCRStarNode split() {
         PCRStarNode splitNode = new PCRStarNode(tree);
-        System.out.println("Split:");
+        // System.out.println("Split:");
         int axis = chooseSplitAxis();
         int splitIndex = chooseSplitIndexInt(axis);
-        System.out.println("size " + childrenNodes.size());
+        // System.out.println("size " + childrenNodes.size());
 
 
         for(int a = childrenNodes.size() - 1; a >= splitIndex; a--) {
             PCRStarNode transferNode = childrenNodes.get(splitIndex);
             childrenNodes.remove(transferNode);
+            updateCountAggregates(transferNode, -1);
             splitNode.add(transferNode);
         }
 
@@ -99,6 +103,7 @@ public class PCRStarNode {
         for(int i = childrenNodes.size() - tree.M; i < childrenNodes.size(); i++) {
             PCRStarNode transferNode = childrenNodes.get(i);
             childrenNodes.remove(transferNode);
+            updateCountAggregates(transferNode, -1);
             reinsertList.add(transferNode);
         }
 
@@ -182,7 +187,7 @@ public class PCRStarNode {
 
         sortByDimension(splitAxis);
 
-        System.out.println("splitAxis " + splitAxis);
+        // System.out.println("splitAxis " + splitAxis);
         return splitAxis;
     }
 
@@ -246,7 +251,7 @@ public class PCRStarNode {
             firstGroup.add(n);
         }
 
-        System.out.println("splitIndex " + splitIndex);
+        // System.out.println("splitIndex " + splitIndex);
         return splitIndex;
     }
 
@@ -359,6 +364,7 @@ public class PCRStarNode {
         childrenNodes.add(n);
         n.parent = this;
         updateMbr(n.mbr);
+        updateCountAggregates(n, 1);
     }
 
     public void addAll(Vector<PCRStarNode> nodes) {
@@ -369,6 +375,20 @@ public class PCRStarNode {
 
     public void remove(PCRStarNode node) {
         childrenNodes.remove(node);
+        updateCountAggregates(node, -1);
+    }
+
+    private void updateCountAggregates(PCRStarNode transferNode, int changeDirection) {
+        if(transferNode.aggregateNumberOfLeafNodes == 0) {
+            aggregateNumberOfLeafNodes += changeDirection;
+        } else {
+            aggregateNumberOfNonLeafNodes += (transferNode.aggregateNumberOfNonLeafNodes + 1) * changeDirection;
+            aggregateNumberOfLeafNodes += (transferNode.aggregateNumberOfLeafNodes) * changeDirection;
+        }
+
+        if(parent != null) {
+            parent.updateCountAggregates(transferNode, changeDirection);
+        }
     }
 
     public double overlap(Rectangle r) {
@@ -466,12 +486,14 @@ public class PCRStarNode {
     public String toString() {
         String parentId;
         if(parent == null) {
-            parentId = "isRoot";
+            parentId = "NONE, this is root";
         } else {
             parentId = parent.index.toString();
         }
         return "Node id: " + index + " | in rectangle: " + mbr
-        + " | parent is " + parentId + " | has " + childrenNodes.size() + " children";
+        + " | parent is " + parentId + " | has " + childrenNodes.size() + " children"
+        + " | (aggregates) nodes: " + aggregateNumberOfNonLeafNodes
+        + ", leaves: " + aggregateNumberOfLeafNodes;
     }
 
     public String toJSON() {

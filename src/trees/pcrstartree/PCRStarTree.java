@@ -46,7 +46,7 @@ public class PCRStarTree {
     }
 
     public void addRoot(PCRStarNode node) {
-        System.out.println("new root!");
+        // System.out.println("new root!");
 
         PCRStarNode newRoot = new PCRStarNode(this);
         newRoot.mbr = new Rectangle(root.mbr);
@@ -65,6 +65,14 @@ public class PCRStarTree {
 
     public void delete(Rectangle r) {
         PCRStarNode deletingNode = root.search(r);
+
+        for(PCRStarNode child : deletingNode.childrenNodes) {
+            if(child.mbr.isOverlapping(r)) {
+                deletingNode = child;
+                break;
+            }
+        }
+
         System.out.println("found node to delete: " + deletingNode);
         if(deletingNode != null) {
             int childDepth = height() - 1; // -1 because height takes leaves into account
