@@ -1,21 +1,19 @@
 package trees.pcrstartree;
 
-import trees.rstartree.*;
 import trees.rectangle.*;
-import trees.tree.*;
 import java.util.*;
 
 
 public class PCRStarNode {
     public static Random rng = new Random();
 
-    public static int uniqueRootId = -1;
+    public static int uniqueNodeId = -1;
 
     public PCRStarNode(PCRStarTree t) {
         tree = t;
         childrenNodes = new Vector<PCRStarNode>(tree.M);
         mbr = new Rectangle(0, 0, 0, 0);
-        index = new Integer(--Node.uniqueRootId);
+        index = new Integer(--PCRStarNode.uniqueNodeId);
     }
 
     public PCRStarTree tree = null;
