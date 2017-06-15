@@ -4,6 +4,9 @@ import trees.rectangle.*;
 import java.util.*;
 
 public class PCRStarTree {
+	public HashMap<String, Boolean> activeAggregates = new HashMap<>();
+	public HashMap<String, Double> aggregateValues = new HashMap<>();
+	
     public PCRStarTree(int m, int M) {
         this.m = m;
         this.M = M;
@@ -12,6 +15,14 @@ public class PCRStarTree {
         root = new PCRStarNode(this);
     }
 
+	public PCRStarTree(int m, int M, Vector<String> aggregates) {
+		for (String agg : aggregates) {
+			activeAggregates[agg] = true;
+			aggregateValues[agg] = 0.0;
+		}
+		PCRStarTree(m, M);
+	}
+	
     public int m = 2; // lower limit of children in node
     public int M = 4; // upper limit of children in node
 

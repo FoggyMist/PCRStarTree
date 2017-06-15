@@ -6,9 +6,11 @@ import java.io.PrintWriter;
 
 public class Main {
     public static void main(String[] args) {
-
-        PCRStarTree tree = new PCRStarTree(2, 4);
-        PCRStarTree sortedInsertTree = new PCRStarTree(2, 4);
+		
+		Vector<String> aggregates = new Vector<>(Arrays.asList(args).subList(2, args.length()));
+		
+        PCRStarTree tree = new PCRStarTree(2, 4, aggregates);
+        PCRStarTree sortedInsertTree = new PCRStarTree(2, 4, aggregates);
 
         Vector<Rectangle> sortedRect = new Vector<Rectangle>();
 
