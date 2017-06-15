@@ -2,8 +2,11 @@ package trees.rectangle;
 
 import java.text.DecimalFormat;
 import java.math.RoundingMode;
+import java.io.Serializable;
 
-public class Rectangle {
+public class Rectangle implements Serializable {
+    public static int byteSize = 8; // (2 x 2 doubles) x 64bit (size of double) = 32
+
     public Rectangle(double x1, double y1, double x2, double y2) {
         lowerLeftPoint = new double[] {Math.min(x1, x2), Math.min(y1, y2)};
         upperRightPoint = new double[] {Math.max(x1, x2), Math.max(y1, y2)};

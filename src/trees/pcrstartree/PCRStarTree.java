@@ -21,10 +21,10 @@ public class PCRStarTree {
     public int height() {
         int height = 0;
         PCRStarNode node = root;
-        node.reading();
+        node.reading(PCRStarNode.pointerByteSize); // we only access parent pointer here
         while(node != null && node.childrenNodes.size() > 0) {
             node = node.childrenNodes.get(0);
-            node.reading();
+            node.reading(PCRStarNode.pointerByteSize);
             height++;
         }
 
@@ -66,7 +66,7 @@ public class PCRStarTree {
         PCRStarNode deletingNode = root.search(r);
 
         for(PCRStarNode child : deletingNode.childrenNodes) {
-            child.reading();
+            child.reading(PCRStarNode.pointerByteSize + Rectangle.byteSize); // mbr + pointer usage
             if(child.mbr.isOverlapping(r)) {
                 deletingNode = child;
                 break;
@@ -77,8 +77,8 @@ public class PCRStarTree {
         if(deletingNode != null) {
             int childDepth = height() - 1; // -1 because height takes leaves into account
             while(deletingNode != null && deletingNode != root) {
+                deletingNode.reading(PCRStarNode.pointerByteSize);
                 PCRStarNode parent = deletingNode.parent;
-                parent.reading();
                 parent.remove(deletingNode);
                 parent.condenseTree();
                 if(deletingNode.childrenNodes.size() > 0) {
@@ -87,6 +87,7 @@ public class PCRStarTree {
                     }
                 }
 
+                parent.reading(PCRStarNode.childrenNodeByteSize);
                 deletingNode = null;
                 if(parent.childrenNodes.size() == 0 && deletingNode != root) {
                     deletingNode = parent;
