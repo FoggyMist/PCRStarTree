@@ -3,17 +3,23 @@ package trees.pcrstartree;
 import trees.rectangle.*;
 import java.util.*;
 
-
 public class PCRStarNode {
     public static Random rng = new Random();
 
     public static int uniqueNodeId = -1;
 
-    public PCRStarNode(PCRStarTree t) {
+    public PCRStarNode(PCRStarTree t, int id) {
         tree = t;
         childrenNodes = new Vector<PCRStarNode>(tree.M);
         mbr = new Rectangle(0, 0, 0, 0);
-        index = new Integer(--PCRStarNode.uniqueNodeId);
+        index = new Integer(id);
+        readCount.put(index, 0);
+        writeCount.put(index, 0);
+        writting();
+    }
+
+    public PCRStarNode(PCRStarTree t) {
+        this(t, --PCRStarNode.uniqueNodeId);
     }
 
     public PCRStarTree tree = null;
@@ -25,16 +31,29 @@ public class PCRStarNode {
     public int aggregateNumberOfLeafNodes = 0;
     public int aggregateNumberOfNonLeafNodes = 0;
 
+    public static HashMap<Integer, Integer> readCount = new HashMap<Integer, Integer>();
+    public static HashMap<Integer, Integer> writeCount = new HashMap<Integer, Integer>();
+
+    public void reading() {
+        increment(readCount);
+    }
+
+    private void writting() {
+        increment(writeCount);
+    }
+
+    public void increment(HashMap<Integer, Integer> counter) {
+        int currentCount = counter.get(index) + 1;
+        counter.put(index, currentCount);
+    }
 
     int depth = 0;
 
     public PCRStarNode insertNode(PCRStarNode insertingNode, int insertDepth) {
         depth = 0;
         PCRStarNode currentNode = this;
-        // System.out.println(depth + " | " + insertDepth);
 
         while(depth < insertDepth) {
-            // System.out.println(depth + " | " + insertDepth);
             currentNode = currentNode.chooseSubTree(insertingNode.mbr);
             depth = depth + 1;
         }
@@ -77,14 +96,12 @@ public class PCRStarNode {
 
     public PCRStarNode split() {
         PCRStarNode splitNode = new PCRStarNode(tree);
-        // System.out.println("Split:");
         int axis = chooseSplitAxis();
         int splitIndex = chooseSplitIndexInt(axis);
-        // System.out.println("size " + childrenNodes.size());
-
 
         for(int a = childrenNodes.size() - 1; a >= splitIndex; a--) {
             PCRStarNode transferNode = childrenNodes.get(splitIndex);
+            transferNode.reading();
             childrenNodes.remove(transferNode);
             updateCountAggregates(transferNode, -1);
             splitNode.add(transferNode);
@@ -100,6 +117,7 @@ public class PCRStarNode {
         Vector<PCRStarNode> reinsertList = new Vector<PCRStarNode>();
         for(int i = childrenNodes.size() - tree.M; i < childrenNodes.size(); i++) {
             PCRStarNode transferNode = childrenNodes.get(i);
+            transferNode.reading();
             childrenNodes.remove(transferNode);
             updateCountAggregates(transferNode, -1);
             reinsertList.add(transferNode);
@@ -110,6 +128,7 @@ public class PCRStarNode {
 
         while(reinsertList.size() > 0) {
             PCRStarNode transferNode = reinsertList.get(0);
+            transferNode.reading();
             reinsertList.remove(0);
 
             PCRStarNode  newNode = tree.root.insertNode(transferNode, tree.height() - height() - 0);
@@ -123,38 +142,26 @@ public class PCRStarNode {
         // CSA1: for each axis
         double lowestS = Double.POSITIVE_INFINITY;
         int splitAxis = -1;
-        // System.out.println("---");
         for(int axis = 0; axis < 2; axis++) { // this implementation supports only 2d rectangles
             // sort the entries by the lower, then by upper value of thier rectangles
             // and determine all distributions as described:
             // margin-value = margin[mbr(firstGroup)] + margin[mbr(secondGroup)]
 
-            // System.out.println("before sorting:");
-            // for(PCRStarNode child: childrenNodes) {
-            //     System.out.println(child);
-            // }
-
             sortByDimension(axis);
-
-            // System.out.println("after sorting:");
-            // for(PCRStarNode child: childrenNodes) {
-            //     System.out.println(child);
-            // }
 
             // compute (s), the sum of all margin-values of different distributions
             double s = 0;
             Vector<PCRStarNode> firstGroup = new Vector<PCRStarNode>(tree.M - 1);
             Vector<PCRStarNode> secondGroup = new Vector<PCRStarNode>(tree.M - 1);
             secondGroup.addAll(childrenNodes);
+            for(PCRStarNode child : childrenNodes) {
+                child.reading();
+            }
             for(int a = 0; a < tree.m; a++) {
                 PCRStarNode transferNode = childrenNodes.get(a);
                 firstGroup.add(transferNode);
                 secondGroup.remove(transferNode);
             }
-
-            // firstGroup.add(childrenNodes.get(0));
-            // secondGroup.addAll(childrenNodes);
-            // secondGroup.remove(childrenNodes.get(0));
 
             int loopEnd = childrenNodes.size() - tree.m;
             for(int a = tree.m; a < loopEnd; a++) {
@@ -185,7 +192,6 @@ public class PCRStarNode {
 
         sortByDimension(splitAxis);
 
-        // System.out.println("splitAxis " + splitAxis);
         return splitAxis;
     }
 
@@ -202,6 +208,9 @@ public class PCRStarNode {
         Rectangle minimumMbr2 = null;
 
         secondGroup.addAll(childrenNodes);
+        for(PCRStarNode child : childrenNodes) {
+            child.reading();
+        }
         for(int a = 0; a < tree.m; a++) {
             PCRStarNode transferNode = childrenNodes.get(a);
             firstGroup.add(transferNode);
@@ -256,6 +265,7 @@ public class PCRStarNode {
 
     public PCRStarNode chooseSubTree(Rectangle r) {
         PCRStarNode node = this;
+        node.reading();
         if(childrenNodes.size() == 0) {
             return node;
         }
@@ -263,11 +273,13 @@ public class PCRStarNode {
         // if the childpointers point to leaves [determine the minimuim
         // overlap cost]
         if(node.childrenNodes.get(0).isLeafNode()) {
+            node.childrenNodes.get(0).reading();
             double smallestOverlapValue = Double.POSITIVE_INFINITY;
             PCRStarNode smallestOverlapNode = null;
             // choose the entry in (node) whose rectangle needs
             // least overlap enlargement to include the new data rectangle
             for(PCRStarNode child : node.childrenNodes) {
+                child.reading();
                 double currentOverlapValue = child.overlap(r);
                 if(currentOverlapValue < smallestOverlapValue) {
                     smallestOverlapValue = currentOverlapValue;
@@ -297,6 +309,7 @@ public class PCRStarNode {
             double smallestEnlargementValue = Double.POSITIVE_INFINITY;
             PCRStarNode smallestEnlargementNode = null;
             for(PCRStarNode child : node.childrenNodes) {
+                child.reading();
                 double currentEnlargement = Rectangle.enlarge(child.mbr, r).area() - child.mbr.area();
                 if(currentEnlargement < smallestEnlargementValue) {
                     smallestEnlargementValue = currentEnlargement;
@@ -318,24 +331,28 @@ public class PCRStarNode {
     public void condenseTree() {
         if(childrenNodes.size() > 0) {
             Rectangle newMbr = new Rectangle(childrenNodes.get(0).mbr);
+            childrenNodes.get(0).reading();
             for(PCRStarNode child : childrenNodes) {
+                child.reading();
                 newMbr = Rectangle.enlarge(newMbr, child.mbr);
             }
 
             mbr = newMbr;
+            writting();
         }
 
         if(parent != null) {
             parent.condenseTree();
-            // System.out.println("condensing: " + parent);
         }
     }
 
     public void updateMbr(Rectangle newRect) {
         mbr = Rectangle.enlarge(mbr, newRect);
+        writting();
 
         if(parent != null) {
             parent.updateMbr(newRect);
+            parent.reading();
         }
     }
 
@@ -358,9 +375,12 @@ public class PCRStarNode {
     public void forceAdd(PCRStarNode n) {
         if(childrenNodes.size() == 0) {
             mbr = new Rectangle(n.mbr);
+            writting();
         }
         childrenNodes.add(n);
+        reading();
         n.parent = this;
+        n.writting();
         updateMbr(n.mbr);
         updateCountAggregates(n, 1);
     }
@@ -373,6 +393,7 @@ public class PCRStarNode {
 
     public void remove(PCRStarNode node) {
         childrenNodes.remove(node);
+        writting();
         updateCountAggregates(node, -1);
     }
 
@@ -392,6 +413,7 @@ public class PCRStarNode {
     public double overlap(Rectangle r) {
         double result = 0;
         for(PCRStarNode child : childrenNodes) {
+            child.reading();
             if(r != child.mbr) {
                 Rectangle overlappingRect = Rectangle.shrink(child.mbr, r);
                 if(overlappingRect != null) {
@@ -406,8 +428,10 @@ public class PCRStarNode {
     public int height() {
         int height = 0;
         PCRStarNode node = this;
+        node.reading();
         while(node != null && node.childrenNodes.size() > 0) {
             node = node.childrenNodes.get(0);
+            node.reading();
             height++;
         }
 
@@ -415,7 +439,13 @@ public class PCRStarNode {
     }
 
     public boolean isLeafNode() {
-        return (childrenNodes.size() == 0 || childrenNodes.get(0).childrenNodes.size() == 0);
+        reading();
+        if(childrenNodes.size() == 0) {
+            return true;
+        } else {
+            childrenNodes.get(0).reading();
+            return childrenNodes.get(0).childrenNodes.size() == 0;
+        }
     }
 
     public boolean isNonleafNode() {
@@ -438,15 +468,21 @@ public class PCRStarNode {
                 }
             }
         });
+
+        for(PCRStarNode child : childrenNodes) {
+            child.reading();
+        }
     }
 
     public PCRStarNode search(Rectangle r) {
+        reading();
         if(this.mbr.isOverlapping(r)) {
             if(this.isLeafNode()) {
                 return this;
             }
 
             for(PCRStarNode child : childrenNodes) {
+                child.reading();
                 PCRStarNode nodeFound = child.search(r);
                 if(nodeFound != null) {
                     return nodeFound;
@@ -460,9 +496,11 @@ public class PCRStarNode {
     public Vector<Integer> wideSearch(Rectangle r) {
         Vector<Integer> results = new Vector<Integer>();
 
+        reading();
         if(this.mbr.isOverlapping(r)) {
             if(this.isLeafNode()) {
                 for(PCRStarNode child : childrenNodes) {
+                    child.reading();
                     if(child.mbr.isOverlapping(r)) {
                         results.add(child.index);
                     }
@@ -472,6 +510,7 @@ public class PCRStarNode {
             }
 
             for(PCRStarNode child : childrenNodes) {
+                child.reading();
                 if(child.mbr.isOverlapping(r)) {
                     results.addAll(child.wideSearch(r));
                 }
@@ -488,10 +527,12 @@ public class PCRStarNode {
         } else {
             parentId = parent.index.toString();
         }
-        return "Node id: " + index + " | in rectangle: " + mbr
-        + " | parent is " + parentId + " | has " + childrenNodes.size() + " children"
-        + " | (aggregates) nodes: " + aggregateNumberOfNonLeafNodes
-        + ", leaves: " + aggregateNumberOfLeafNodes;
+        return "id: " + index + " | rect: " + mbr
+        + " | parent: " + parentId + " | has " + childrenNodes.size() + " children"
+        // + " | (aggregates) nodes: " + aggregateNumberOfNonLeafNodes
+        // + ", leaves: " + aggregateNumberOfLeafNodes;
+        + " | (access) read: " + readCount.get(index)
+        + ", write: " + writeCount.get(index);
     }
 
     public String toJSON() {
