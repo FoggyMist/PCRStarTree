@@ -1,8 +1,5 @@
-import trees.tree.*;
 import trees.rectangle.*;
-import trees.rstartree.*;
 import trees.pcrstartree.*;
-import trees.rtree.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.io.PrintWriter;

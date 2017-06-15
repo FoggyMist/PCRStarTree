@@ -1,8 +1,6 @@
 package trees.pcrstartree;
 
-import trees.rstartree.*;
 import trees.rectangle.*;
-import trees.tree.*;
 import java.util.*;
 
 public class PCRStarTree {
