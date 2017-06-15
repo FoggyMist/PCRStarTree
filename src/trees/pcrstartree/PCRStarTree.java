@@ -21,8 +21,10 @@ public class PCRStarTree {
     public int height() {
         int height = 0;
         PCRStarNode node = root;
+        node.reading(PCRStarNode.pointerByteSize); // we only access parent pointer here
         while(node != null && node.childrenNodes.size() > 0) {
             node = node.childrenNodes.get(0);
+            node.reading(PCRStarNode.pointerByteSize);
             height++;
         }
 
@@ -33,8 +35,7 @@ public class PCRStarTree {
     public int nonleafNodeSize = 0;
 
     public void insert(int index, Rectangle r) {
-        PCRStarNode newNode = new PCRStarNode(this);
-        newNode.index = new Integer(index);
+        PCRStarNode newNode = new PCRStarNode(this, index);
         newNode.mbr = r;
         newNode = root.insertNode(newNode, height() - 1);
 
@@ -65,6 +66,7 @@ public class PCRStarTree {
         PCRStarNode deletingNode = root.search(r);
 
         for(PCRStarNode child : deletingNode.childrenNodes) {
+            child.reading(PCRStarNode.pointerByteSize + Rectangle.byteSize); // mbr + pointer usage
             if(child.mbr.isOverlapping(r)) {
                 deletingNode = child;
                 break;
@@ -75,6 +77,7 @@ public class PCRStarTree {
         if(deletingNode != null) {
             int childDepth = height() - 1; // -1 because height takes leaves into account
             while(deletingNode != null && deletingNode != root) {
+                deletingNode.reading(PCRStarNode.pointerByteSize);
                 PCRStarNode parent = deletingNode.parent;
                 parent.remove(deletingNode);
                 parent.condenseTree();
@@ -84,6 +87,7 @@ public class PCRStarTree {
                     }
                 }
 
+                parent.reading(PCRStarNode.childrenNodeByteSize);
                 deletingNode = null;
                 if(parent.childrenNodes.size() == 0 && deletingNode != root) {
                     deletingNode = parent;
@@ -99,7 +103,7 @@ public class PCRStarTree {
     }
 
     public void dump(PCRStarNode n, int level) {
-        System.out.println("tree-level: " + level +" | " + n);
+        System.out.println("level: " + level +" | " + n);
 
         for(PCRStarNode node : n.childrenNodes) {
             dump(node, level + 1);
