@@ -34,8 +34,8 @@ public class PCRStarTree {
     public int leafNodeSize = 0;
     public int nonleafNodeSize = 0;
 
-    public void insert(int index, Rectangle r) {
-        PCRStarNode newNode = new PCRStarNode(this, index);
+    public void insert(int index, double value, Rectangle r) {
+        PCRStarNode newNode = new PCRStarNode(this, index, value);
         newNode.mbr = r;
         newNode = root.insertNode(newNode, height() - 1);
 
@@ -58,7 +58,7 @@ public class PCRStarTree {
         return root.search(r);
     }
 
-    public Vector<Integer> wideSearch(Rectangle r) {
+    public Vector<PCRStarNode> wideSearch(Rectangle r) {
         return root.wideSearch(r);
     }
 

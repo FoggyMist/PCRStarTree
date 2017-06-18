@@ -10,8 +10,6 @@ public class Main {
         PCRStarTree tree = new PCRStarTree(2, 4);
         PCRStarTree sortedInsertTree = new PCRStarTree(2, 4);
 
-        Vector<Rectangle> sortedRect = new Vector<Rectangle>();
-
         int storedIndex = -1;
         Rectangle storedRect = null;
 
@@ -21,6 +19,7 @@ public class Main {
             double y = ThreadLocalRandom.current().nextDouble(-100, 100);
             double height = ThreadLocalRandom.current().nextDouble(1, 2);
             double width = ThreadLocalRandom.current().nextDouble(1, 2);
+            double value = ThreadLocalRandom.current().nextDouble(0, 100);
             Rectangle rect = new Rectangle(
                 x,
                 y,
@@ -28,35 +27,12 @@ public class Main {
                 y+height
             );
 
-            tree.insert(a, rect);
+            tree.insert(a, value, rect);
 
             if(a == 27) {
                 storedIndex = a;
                 storedRect = rect;
             }
-
-            sortedRect.add(rect);
-        }
-
-        Collections.sort(sortedRect, (Rectangle n1, Rectangle n2) -> {
-            if(n1.lowerLeftPoint[1] < n2.lowerLeftPoint[1]) {
-                return -1;
-            } else if(n1.lowerLeftPoint[1] > n2.lowerLeftPoint[1]) {
-                return 1;
-            } else { // n1 lower == n2 lower, then compare upper
-                if(n1.upperRightPoint[1] < n2.upperRightPoint[1]) {
-                    return -1;
-                } else if(n1.upperRightPoint[1] > n2.upperRightPoint[1]) {
-                    return 1;
-                 } else { // n1 == n2
-                    return 0;
-                }
-            }
-        });
-
-        int id = 1;
-        for(Rectangle r : sortedRect) {
-            sortedInsertTree.insert(id++, r);
         }
 
         tree.delete(storedRect);
@@ -71,15 +47,6 @@ public class Main {
             System.out.println("data dump to JSON has failed");
         }
 
-        try{
-            PrintWriter writer = new PrintWriter("viewer/data2.js", "UTF-8");
-            writer.println("var data2 = " + sortedInsertTree.toJSON() + ";");
-            writer.close();
-        } catch (Exception e) {
-            System.out.println("data dump to JSON has failed");
-        }
-
-
         // System.out.println("leaf search:");
         // PCRStarNode leafResults = tree.search(new Rectangle(-10, -10, 10, 10));
         // if(leafResults == null) {
@@ -92,17 +59,17 @@ public class Main {
         //     }
         //
         // }
-        //
-        // System.out.println("wide search:");
-        // Vector<Integer> wideResults = tree.wideSearch(new Rectangle(-10, -10, 10, 10));
-        // if(wideResults.size() == 0) {
-        //     System.out.println("no results found");
-        // } else {
-        //     System.out.println("Ids found:");
-        //     for(Integer a : wideResults) {
-        //         System.out.println(a);
-        //     }
-        // }
+
+        System.out.println("wide search:");
+        Vector<PCRStarNode> wideResults = tree.wideSearch(new Rectangle(-10, -10, 10, 10));
+        if(wideResults.size() == 0) {
+            System.out.println("no results found");
+        } else {
+            System.out.println("Ids found:");
+            for(PCRStarNode node : wideResults) {
+                System.out.println(node.index + " - " + node.getValue());
+            }
+        }
 
     }
 }
