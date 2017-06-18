@@ -65,9 +65,9 @@ public class Main {
         if(wideResults.size() == 0) {
             System.out.println("no results found");
         } else {
-            System.out.println("Ids found:");
+            System.out.println("nodes found:");
             for(PCRStarNode node : wideResults) {
-                System.out.println(node.index + " - " + node.getValue());
+                System.out.println(node);
             }
         }
 

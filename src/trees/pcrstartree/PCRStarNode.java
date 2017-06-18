@@ -3,6 +3,7 @@ package trees.pcrstartree;
 import trees.rectangle.*;
 import java.util.*;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 
 public class PCRStarNode implements Serializable {
     public static Random rng = new Random();
@@ -548,13 +549,14 @@ public class PCRStarNode implements Serializable {
     }
 
     public String toString() {
+        DecimalFormat df = new DecimalFormat("#.#");
         String parentId;
         if(parent == null) {
             parentId = "NONE, this is root";
         } else {
             parentId = parent.index.toString();
         }
-        return "id: " + index + " | rect: " + mbr
+        return "id: " + index + " | value: " + df.format(value) + " | rect: " + mbr
         + " | parent: " + parentId + " | has " + childrenNodes.size() + " children"
         // + " | (aggregates) nodes: " + aggregateNumberOfNonLeafNodes
         // + ", leaves: " + aggregateNumberOfLeafNodes;
