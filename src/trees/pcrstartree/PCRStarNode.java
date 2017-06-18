@@ -3,6 +3,7 @@ package trees.pcrstartree;
 import trees.rectangle.*;
 import java.util.*;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 
 public class PCRStarNode implements Serializable {
     public static Random rng = new Random();
@@ -11,19 +12,33 @@ public class PCRStarNode implements Serializable {
     // parentPointer, childrenNodes, index, treePointer, value, rectangle,
     // overflowTreatment, depth = 2x pointers, 2x int, 1x double 1x full vector/array
     // = 2x2 + 2x4 + 8 + (4 + 2x tree.leafNodeSize+1) = 20 + (4 + 9x2) = 42
-    public static int byteSize = 42;
+    public static int byteSize = 50;
     public static int uniqueNodeId = -1;
 
-    public PCRStarNode(PCRStarTree t, int id) {
+    private double value = 0;
+    public double getValue() { return value; }
+    public void setValue(double newVal) {
+        value = newVal;
+        // updateAggregates()
+        // parent.updateAggregates()
+    }
+
+    public PCRStarNode(PCRStarTree t, int id, double val) {
         tree = t;
-        childrenNodes = new Vector<PCRStarNode>(tree.M);
-        mbr = new Rectangle(0, 0, 0, 0);
         index = new Integer(id);
+        value = val;
+        mbr = new Rectangle(0, 0, 0, 0);
+        childrenNodes = new Vector<PCRStarNode>(tree.M);
         readCount.put(index, 0);
         writeCount.put(index, 0);
         readByte.put(index, 0);
         writeByte.put(index, 0);
         writting(byteSize);
+    }
+
+
+    public PCRStarNode(PCRStarTree t, int id) {
+        this(t, id, 0);
     }
 
     public PCRStarNode(PCRStarTree t) {
@@ -505,8 +520,8 @@ public class PCRStarNode implements Serializable {
         return null;
     }
 
-    public Vector<Integer> wideSearch(Rectangle r) {
-        Vector<Integer> results = new Vector<Integer>();
+    public Vector<PCRStarNode> wideSearch(Rectangle r) {
+        Vector<PCRStarNode> results = new Vector<PCRStarNode>();
 
         reading(Rectangle.byteSize);
         if(this.mbr.isOverlapping(r)) {
@@ -515,7 +530,7 @@ public class PCRStarNode implements Serializable {
             if(this.isLeafNode()) {
                 for(PCRStarNode child : childrenNodes) {
                     if(child.mbr.isOverlapping(r)) {
-                        results.add(child.index);
+                        results.add(child);
                     }
                 }
 
@@ -534,13 +549,14 @@ public class PCRStarNode implements Serializable {
     }
 
     public String toString() {
+        DecimalFormat df = new DecimalFormat("#.#");
         String parentId;
         if(parent == null) {
             parentId = "NONE, this is root";
         } else {
             parentId = parent.index.toString();
         }
-        return "id: " + index + " | rect: " + mbr
+        return "id: " + index + " | value: " + df.format(value) + " | rect: " + mbr
         + " | parent: " + parentId + " | has " + childrenNodes.size() + " children"
         // + " | (aggregates) nodes: " + aggregateNumberOfNonLeafNodes
         // + ", leaves: " + aggregateNumberOfLeafNodes;
