@@ -14,6 +14,7 @@ public class PCRStarNode implements Serializable {
     public static int byteSize = 42;
     public static int uniqueNodeId = -1;
 
+	
     public PCRStarNode(PCRStarTree t, int id) {
         tree = t;
         childrenNodes = new Vector<PCRStarNode>(tree.M);
@@ -270,7 +271,6 @@ public class PCRStarNode implements Serializable {
         // System.out.println("splitIndex " + splitIndex);
         return splitIndex;
     }
-
 
     public PCRStarNode chooseSubTree(Rectangle r) {
         PCRStarNode node = this;
@@ -532,7 +532,7 @@ public class PCRStarNode implements Serializable {
 
         return results;
     }
-
+	
     public String toString() {
         String parentId;
         if(parent == null) {

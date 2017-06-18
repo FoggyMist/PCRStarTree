@@ -1,9 +1,21 @@
 package trees.pcrstartree;
 
 import trees.rectangle.*;
+import trees.pcrstartree.util.DefaultHashMap;
 import java.util.*;
 
 public class PCRStarTree {
+	
+	public DefaultHashMap<String, Boolean> activeAggregates = null;
+	
+	public PCRStarTree(int m, int M, Vector<String> aggregateList) {
+		activeAggregates = new DefaultHashMap<>(false);
+		for (String aggregate : aggregateList) {
+			activeAggregates.put(aggregate, true);
+		}
+		PCRStarTree(m, M);
+	}
+	
     public PCRStarTree(int m, int M) {
         this.m = m;
         this.M = M;
