@@ -7,7 +7,7 @@ public class DefaultHashMap<K, V> extends HashMap<K, V> { //HashMap with default
 	public DefaultHashMap(V defaultValue) {
 		this.defaultValue = defaultValue;
 	}
-	public V get(K key) {
+	public V getk(K key) {
 		return containsKey(key) ? super.get(key) : defaultValue;
 	}
 }

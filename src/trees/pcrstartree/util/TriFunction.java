@@ -1,5 +1,8 @@
 package trees.pcrstartree.util;
 
+import java.util.function.Function;
+import java.util.Objects;
+
 @FunctionalInterface
 interface TriFunction<A,B,C,R> { //interface for implementing functions of the form: R functionName(A a, B b, C c)
     R apply(A a, B b, C c);

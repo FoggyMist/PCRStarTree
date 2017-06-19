@@ -8,21 +8,21 @@ public class PCRStarTree {
 	
 	public DefaultHashMap<String, Boolean> activeAggregates = null;
 	
-	public PCRStarTree(int m, int M, Vector<String> aggregateList) {
-		activeAggregates = new DefaultHashMap<>(false);
-		for (String aggregate : aggregateList) {
-			activeAggregates.put(aggregate, true);
-		}
-		PCRStarTree(m, M);
-	}
-	
-    public PCRStarTree(int m, int M) {
+	public PCRStarTree(int m, int M) {
         this.m = m;
         this.M = M;
         leafNodeSize = M * 2;
         nonleafNodeSize = M;
         root = new PCRStarNode(this);
     }
+	
+	public PCRStarTree(int m, int M, Vector<String> aggregateList) {
+		this(m, M);
+		activeAggregates = new DefaultHashMap<>(false);
+		for (String aggregate : aggregateList) {
+			activeAggregates.put(aggregate, true);
+		}
+	}
 
     public int m = 2; // lower limit of children in node
     public int M = 4; // upper limit of children in node
@@ -46,8 +46,8 @@ public class PCRStarTree {
     public int leafNodeSize = 0;
     public int nonleafNodeSize = 0;
 
-    public void insert(int index, Rectangle r) {
-        PCRStarNode newNode = new PCRStarNode(this, index);
+    public void insert(int index, double value, Rectangle r) {
+        PCRStarNode newNode = new PCRStarNode(this, index, value);
         newNode.mbr = r;
         newNode = root.insertNode(newNode, height() - 1);
 
@@ -70,7 +70,7 @@ public class PCRStarTree {
         return root.search(r);
     }
 
-    public Vector<Integer> wideSearch(Rectangle r) {
+    public Vector<PCRStarNode> wideSearch(Rectangle r) {
         return root.wideSearch(r);
     }
 
@@ -121,6 +121,10 @@ public class PCRStarTree {
             dump(node, level + 1);
         }
     }
+	
+	public double rootValueFor(String aggregate) {
+		return root.checkValueFor(aggregate);
+	}
 
     public String toJSON() {
         String result = "";
