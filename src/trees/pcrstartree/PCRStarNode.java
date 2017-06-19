@@ -434,6 +434,8 @@ public class PCRStarNode implements Serializable {
         if(parent != null) {
             parent.updateCountAggregates(transferNode, changeDirection);
         }
+
+        aggregateController.updateEverything(this);
     }
 
     public double overlap(Rectangle r) {
@@ -548,11 +550,11 @@ public class PCRStarNode implements Serializable {
 
         return results;
     }
-	
+
 	public double checkValueFor(String aggregate) {
 		return aggregateController.checkValueFor(aggregate);
 	}
-	
+
     public String toString() {
         DecimalFormat df = new DecimalFormat("#.#");
         String parentId;

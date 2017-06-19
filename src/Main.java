@@ -80,6 +80,8 @@ public class Main {
             System.out.println("nodes found:");
             for(PCRStarNode node : wideResults) {
                 System.out.println(node);
+                // System.out.println(node.parent.checkValueFor("MAX"));
+                System.out.println(node.parent.checkValueFor("MIN"));
             }
         }
 
