@@ -4,6 +4,7 @@ import trees.rectangle.*;
 import java.util.*;
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import trees.pcrstartree.util.AggregateController;
 
 public class PCRStarNode implements Serializable {
     public static Random rng = new Random();
@@ -15,6 +16,7 @@ public class PCRStarNode implements Serializable {
     public static int byteSize = 50;
     public static int uniqueNodeId = -1;
 
+	public AggregateController aggregateController = new AggregateController();
     private double value = 0;
     public double getValue() { return value; }
     public void setValue(double newVal) {
@@ -286,7 +288,6 @@ public class PCRStarNode implements Serializable {
         return splitIndex;
     }
 
-
     public PCRStarNode chooseSubTree(Rectangle r) {
         PCRStarNode node = this;
         if(childrenNodes.size() == 0) {
@@ -433,6 +434,8 @@ public class PCRStarNode implements Serializable {
         if(parent != null) {
             parent.updateCountAggregates(transferNode, changeDirection);
         }
+
+        aggregateController.update(this);
     }
 
     public double overlap(Rectangle r) {
@@ -548,6 +551,10 @@ public class PCRStarNode implements Serializable {
         return results;
     }
 
+	public double checkValueFor(String aggregate) {
+		return aggregateController.checkValueFor(aggregate);
+	}
+
     public String toString() {
         DecimalFormat df = new DecimalFormat("#.#");
         String parentId;
@@ -558,12 +565,12 @@ public class PCRStarNode implements Serializable {
         }
         return "id: " + index + " | value: " + df.format(value) + " | rect: " + mbr
         + " | parent: " + parentId + " | has " + childrenNodes.size() + " children"
-        // + " | (aggregates) nodes: " + aggregateNumberOfNonLeafNodes
-        // + ", leaves: " + aggregateNumberOfLeafNodes;
-        + " | (access) read: " + readCount.get(index)
-        + ", write: " + writeCount.get(index)
-        + " | (byte) read: " + readByte.get(index)
-        + ", write: " + writeByte.get(index);
+        + " | (aggregates) min: " + aggregateController.checkValueFor("MIN")
+        + ", max: " + aggregateController.checkValueFor("MAX");
+        // + " | (access) read: " + readCount.get(index)
+        // + ", write: " + writeCount.get(index)
+        // + " | (byte) read: " + readByte.get(index)
+        // + ", write: " + writeByte.get(index);
     }
 
     public String toJSON() {

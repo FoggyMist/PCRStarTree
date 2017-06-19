@@ -1,16 +1,28 @@
 package trees.pcrstartree;
 
 import trees.rectangle.*;
+import trees.pcrstartree.util.DefaultHashMap;
 import java.util.*;
 
 public class PCRStarTree {
-    public PCRStarTree(int m, int M) {
+	
+	public DefaultHashMap<String, Boolean> activeAggregates = null;
+	
+	public PCRStarTree(int m, int M) {
         this.m = m;
         this.M = M;
         leafNodeSize = M * 2;
         nonleafNodeSize = M;
         root = new PCRStarNode(this);
     }
+	
+	public PCRStarTree(int m, int M, Vector<String> aggregateList) {
+		this(m, M);
+		activeAggregates = new DefaultHashMap<>(false);
+		for (String aggregate : aggregateList) {
+			activeAggregates.put(aggregate, true);
+		}
+	}
 
     public int m = 2; // lower limit of children in node
     public int M = 4; // upper limit of children in node
@@ -109,6 +121,10 @@ public class PCRStarTree {
             dump(node, level + 1);
         }
     }
+	
+	public double rootValueFor(String aggregate) {
+		return root.checkValueFor(aggregate);
+	}
 
     public String toJSON() {
         String result = "";
