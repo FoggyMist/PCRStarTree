@@ -6,21 +6,25 @@ import java.io.PrintWriter;
 
 public class Main {
     public static void main(String[] args) {
+        if(args.length < 1) {
+            System.out.println("Prosze podac ilosc node do wprowadzenia w liscie argumentow");
+            return;
+        }
 		double sizeOfTree = 0;
 		try {
-			sizeOfTree = Double.parseDouble(args[1]);
+			sizeOfTree = Double.parseDouble(args[0]);
 		}
 		catch(NumberFormatException ex) {
 			System.out.println("Bad parameter.");
 			System.exit(1);
 		}
-	
-        PCRStarTree tree = new PCRStarTree(2, 4, new Vector<>(Arrays.asList(args).subList(2, args.length)));
+
+        PCRStarTree tree = new PCRStarTree(2, 4, new Vector<>(Arrays.asList(args).subList(1, args.length)));
         PCRStarTree sortedInsertTree = new PCRStarTree(2, 4);
 
         int storedIndex = -1;
         Rectangle storedRect = null;
-		
+
         // tree.insert(1, new Rectangle(1,1,3,3));
         for(int a = 1; a <= sizeOfTree; a++) {
             double x = ThreadLocalRandom.current().nextDouble(-100, 100);
