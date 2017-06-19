@@ -38,7 +38,7 @@ public class PCRStarNode implements Serializable {
         writting(byteSize);
 
         if(id < 0) { // negative index -> structural node
-            aggregateController = new AggregateController();
+            aggregateController = new AggregateController(t.activeAggregates);
             value = null;
         } else { // positive index -> data node
             aggregateController = null;
@@ -587,8 +587,10 @@ public class PCRStarNode implements Serializable {
 
         String aggregatesStr = "";
         if(aggregateController != null) {
-            aggregatesStr += " | (aggregates) min: " + aggregateController.checkValueFor("MIN")
-            + ", max: " + aggregateController.checkValueFor("MAX");
+            aggregatesStr += "| ";
+            for (Map.Entry<String, Aggregate> aggregate : aggregateController.aggregateMap.entrySet()) {
+                aggregatesStr += "(" + aggregate.getKey() + ") " + aggregateController.checkValueFor(aggregate.getKey()) + ", ";
+            }
         }
 
         return "id: " + index +  valueStr + " | rect: " + mbr
