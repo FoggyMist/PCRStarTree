@@ -5,7 +5,7 @@ import trees.pcrstartree.PCRStarNode;
 import trees.pcrstartree.util.TriFunction;
 import trees.pcrstartree.util.Aggregate;
 import java.util.HashMap;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.Map;
 public class AggregateController {
 	public HashMap<String, Aggregate> aggregateMap;
@@ -16,29 +16,45 @@ public class AggregateController {
 
 		defaultAggregateMap.put("MIN", new Aggregate(
 			Double.POSITIVE_INFINITY,
-			(aggregate, node) -> {
+			(node) -> {
+				Aggregate aggregate = node.getAggregateFor("MIN");
 				double newMin = Double.POSITIVE_INFINITY;
 				for(PCRStarNode child : node.childrenNodes) {
-					if(child.getValue() < newMin) {
-						newMin = child.getValue();
+					double childValue;
+					if(child.aggregateController == null) {
+						childValue = child.getValue();
+					} else {
+						childValue = child.checkValueFor("MIN");
+					}
+
+					if(childValue < newMin) {
+						newMin = childValue;
 					}
 				}
 				aggregate.value = newMin;
-				return aggregate.value;
+				return true;
 			})
 		);
 
 		defaultAggregateMap.put("MAX", new Aggregate(
 			Double.NEGATIVE_INFINITY,
-			(aggregate, node) -> {
+			(node) -> {
+				Aggregate aggregate = node.getAggregateFor("MAX");
 				double newMax = Double.NEGATIVE_INFINITY;
 				for(PCRStarNode child : node.childrenNodes) {
-					if(child.getValue() > newMax) {
-						newMax = child.getValue();
+					double childValue;
+					if(child.aggregateController == null) {
+						childValue = child.getValue();
+					} else {
+						childValue = child.checkValueFor("MAX");
+					}
+
+					if(childValue > newMax) {
+						newMax = childValue;
 					}
 				}
 				aggregate.value = newMax;
-				return aggregate.value;
+				return true;
 			})
 		);
 
@@ -62,10 +78,14 @@ public class AggregateController {
 
 	public void update(PCRStarNode node) {
 		for (Map.Entry<String, Aggregate> aggregate : aggregateMap.entrySet())
-			aggregate.getValue().globalUpdate.apply(aggregate.getValue(), node);
+			aggregate.getValue().update.apply(node);
 	}
 
 	public double checkValueFor(String aggregateName) {
 		return aggregateMap.get(aggregateName).value;
+	}
+
+	public Aggregate getAggregateFor(String aggregateName) {
+		return aggregateMap.get(aggregateName);
 	}
 }

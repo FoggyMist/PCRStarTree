@@ -5,6 +5,7 @@ import java.util.*;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import trees.pcrstartree.util.AggregateController;
+import trees.pcrstartree.util.Aggregate;
 
 public class PCRStarNode implements Serializable {
     public static Random rng = new Random();
@@ -16,11 +17,11 @@ public class PCRStarNode implements Serializable {
     public static int byteSize = 50;
     public static int uniqueNodeId = -1;
 
-	public AggregateController aggregateController = new AggregateController();
-    private double value = 0;
-    public double getValue() { return value; }
+	public AggregateController aggregateController;
+    private Double value;
+    public Double getValue() { return value; }
     public void setValue(double newVal) {
-        value = newVal;
+        value = new Double(newVal);
         // updateAggregates()
         // parent.updateAggregates()
     }
@@ -28,7 +29,6 @@ public class PCRStarNode implements Serializable {
     public PCRStarNode(PCRStarTree t, int id, double val) {
         tree = t;
         index = new Integer(id);
-        value = val;
         mbr = new Rectangle(0, 0, 0, 0);
         childrenNodes = new Vector<PCRStarNode>(tree.M);
         readCount.put(index, 0);
@@ -36,6 +36,14 @@ public class PCRStarNode implements Serializable {
         readByte.put(index, 0);
         writeByte.put(index, 0);
         writting(byteSize);
+
+        if(id < 0) { // negative index -> structural node
+            aggregateController = new AggregateController();
+            value = null;
+        } else { // positive index -> data node
+            aggregateController = null;
+            value = new Double(val);
+        }
     }
 
 
@@ -137,7 +145,7 @@ public class PCRStarNode implements Serializable {
         for(int a = childrenNodes.size() - 1; a >= splitIndex; a--) {
             PCRStarNode transferNode = childrenNodes.get(splitIndex);
             childrenNodes.remove(transferNode);
-            updateCountAggregates(transferNode, -1);
+            updateAggregates(transferNode, -1);
             splitNode.add(transferNode);
         }
 
@@ -152,7 +160,7 @@ public class PCRStarNode implements Serializable {
         for(int i = childrenNodes.size() - tree.M; i < childrenNodes.size(); i++) {
             PCRStarNode transferNode = childrenNodes.get(i);
             childrenNodes.remove(transferNode);
-            updateCountAggregates(transferNode, -1);
+            updateAggregates(transferNode, -1);
             reinsertList.add(transferNode);
         }
 
@@ -408,7 +416,7 @@ public class PCRStarNode implements Serializable {
         n.parent = this;
         n.writting(pointerByteSize);
         updateMbr(n.mbr);
-        updateCountAggregates(n, 1);
+        updateAggregates(n, 1);
     }
 
     public void addAll(Vector<PCRStarNode> nodes) {
@@ -420,10 +428,10 @@ public class PCRStarNode implements Serializable {
     public void remove(PCRStarNode node) {
         childrenNodes.remove(node);
         writting(pointerByteSize + 4);
-        updateCountAggregates(node, -1);
+        updateAggregates(node, -1);
     }
 
-    private void updateCountAggregates(PCRStarNode transferNode, int changeDirection) {
+    private void updateAggregates(PCRStarNode transferNode, int changeDirection) {
         if(transferNode.aggregateNumberOfLeafNodes == 0) {
             aggregateNumberOfLeafNodes += changeDirection;
         } else {
@@ -432,10 +440,12 @@ public class PCRStarNode implements Serializable {
         }
 
         if(parent != null) {
-            parent.updateCountAggregates(transferNode, changeDirection);
+            parent.updateAggregates(transferNode, changeDirection);
         }
 
-        aggregateController.update(this);
+        if(aggregateController != null) {
+            aggregateController.update(this);
+        }
     }
 
     public double overlap(Rectangle r) {
@@ -555,18 +565,35 @@ public class PCRStarNode implements Serializable {
 		return aggregateController.checkValueFor(aggregate);
 	}
 
+    public Aggregate getAggregateFor(String aggregateName) {
+		return aggregateController.getAggregateFor(aggregateName);
+	}
+
+
     public String toString() {
-        DecimalFormat df = new DecimalFormat("#.#");
-        String parentId;
-        if(parent == null) {
-            parentId = "NONE, this is root";
-        } else {
-            parentId = parent.index.toString();
+        String valueStr = "";
+        if(value != null) {
+            DecimalFormat df = new DecimalFormat("#.#");
+
+            valueStr += "| value: " + df.format(value);
         }
-        return "id: " + index + " | value: " + df.format(value) + " | rect: " + mbr
-        + " | parent: " + parentId + " | has " + childrenNodes.size() + " children"
-        + " | (aggregates) min: " + aggregateController.checkValueFor("MIN")
-        + ", max: " + aggregateController.checkValueFor("MAX");
+
+        String parentIdStr;
+        if(parent == null) {
+            parentIdStr = "NONE, this is root";
+        } else {
+            parentIdStr = parent.index.toString();
+        }
+
+        String aggregatesStr = "";
+        if(aggregateController != null) {
+            aggregatesStr += " | (aggregates) min: " + aggregateController.checkValueFor("MIN")
+            + ", max: " + aggregateController.checkValueFor("MAX");
+        }
+
+        return "id: " + index +  valueStr + " | rect: " + mbr
+        + " | parent: " + parentIdStr + " | has " + childrenNodes.size() + " children"
+        + aggregatesStr;
         // + " | (access) read: " + readCount.get(index)
         // + ", write: " + writeCount.get(index)
         // + " | (byte) read: " + readByte.get(index)
