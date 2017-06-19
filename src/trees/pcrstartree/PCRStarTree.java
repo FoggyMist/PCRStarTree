@@ -5,9 +5,9 @@ import trees.pcrstartree.util.DefaultHashMap;
 import java.util.*;
 
 public class PCRStarTree {
-	
+
 	public DefaultHashMap<String, Boolean> activeAggregates = null;
-	
+
 	public PCRStarTree(int m, int M) {
         this.m = m;
         this.M = M;
@@ -15,7 +15,7 @@ public class PCRStarTree {
         nonleafNodeSize = M;
         root = new PCRStarNode(this);
     }
-	
+
 	public PCRStarTree(int m, int M, Vector<String> aggregateList) {
 		this(m, M);
 		activeAggregates = new DefaultHashMap<>(false);
@@ -121,7 +121,7 @@ public class PCRStarTree {
             dump(node, level + 1);
         }
     }
-	
+
 	public double rootValueFor(String aggregate) {
 		return root.checkValueFor(aggregate);
 	}

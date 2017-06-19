@@ -47,7 +47,7 @@ public class Main {
             }
         }
 
-        tree.delete(storedRect);
+        // tree.delete(storedRect);
         tree.dump();
         // System.out.println("removing: " + storedIndex + " | " + storedRect);
 
