@@ -26,7 +26,7 @@ public class AggregateController {
 					if (n.isLeafNode())
 						return aggr.value = n.getValue();
 					for (PCRStarNode child : n.childrenNodes) {
-						double x = (double)bc.apply(bc, child.aggregateController, child);
+						double x = (double)bc.apply(bc, child.aggregateController.aggregateMap.get("MIN"), child);
 						if (aggr.value > x) aggr.value = x;
 					}	
 					return aggr.value;
@@ -55,7 +55,7 @@ public class AggregateController {
 					if (n.isLeafNode())
 						return aggr.value = n.getValue();
 					for (PCRStarNode child : n.childrenNodes) {
-						double x = (double)bc.apply(bc, child.aggregateController, child);
+						double x = (double)bc.apply(bc, child.aggregateController.aggregateMap.get("MAX"), child);
 						if (aggr.value < x) aggr.value = x;
 					}	
 					return aggr.value;
@@ -89,15 +89,14 @@ public class AggregateController {
 					ancestor.parent.aggregateController.aggregateMap.get("AVG");
 				}
 				return aggregate.value;
-			}));
-		*/
+			}));*/
 		defaultController = new AggregateController(defaultAggregateMap);
 	}
 	
 	public AggregateController(HashMap<String, Aggregate> aggregateMap) {
-		aggregateMap = new HashMap<>();
+		this.aggregateMap = new HashMap<>();
 		for (Map.Entry<String, Aggregate> aggregate : aggregateMap.entrySet()) {
-			aggregateMap.put(aggregate.getKey(), new Aggregate(aggregate.getValue()));
+			this.aggregateMap.put(aggregate.getKey(), new Aggregate(aggregate.getValue()));
 		}
 	}
 	
