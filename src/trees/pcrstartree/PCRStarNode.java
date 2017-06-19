@@ -435,7 +435,7 @@ public class PCRStarNode implements Serializable {
             parent.updateCountAggregates(transferNode, changeDirection);
         }
 
-        aggregateController.updateEverything(this);
+        aggregateController.update(this);
     }
 
     public double overlap(Rectangle r) {
@@ -565,12 +565,12 @@ public class PCRStarNode implements Serializable {
         }
         return "id: " + index + " | value: " + df.format(value) + " | rect: " + mbr
         + " | parent: " + parentId + " | has " + childrenNodes.size() + " children"
-        // + " | (aggregates) nodes: " + aggregateNumberOfNonLeafNodes
-        // + ", leaves: " + aggregateNumberOfLeafNodes;
-        + " | (access) read: " + readCount.get(index)
-        + ", write: " + writeCount.get(index)
-        + " | (byte) read: " + readByte.get(index)
-        + ", write: " + writeByte.get(index);
+        + " | (aggregates) min: " + aggregateController.checkValueFor("MIN")
+        + ", max: " + aggregateController.checkValueFor("MAX");
+        // + " | (access) read: " + readCount.get(index)
+        // + ", write: " + writeCount.get(index)
+        // + " | (byte) read: " + readByte.get(index)
+        // + ", write: " + writeByte.get(index);
     }
 
     public String toJSON() {
