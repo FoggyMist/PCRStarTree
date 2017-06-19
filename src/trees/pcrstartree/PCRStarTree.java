@@ -9,19 +9,20 @@ public class PCRStarTree {
 	public DefaultHashMap<String, Boolean> activeAggregates = null;
 
 	public PCRStarTree(int m, int M) {
-        this.m = m;
-        this.M = M;
-        leafNodeSize = M * 2;
-        nonleafNodeSize = M;
-        root = new PCRStarNode(this);
+		this(m, M, null);
     }
 
 	public PCRStarTree(int m, int M, Vector<String> aggregateList) {
-		this(m, M);
-		activeAggregates = new DefaultHashMap<>(false);
+		activeAggregates = new DefaultHashMap<String, Boolean>(false);
 		for (String aggregate : aggregateList) {
 			activeAggregates.put(aggregate, true);
 		}
+
+		this.m = m;
+		this.M = M;
+		leafNodeSize = M * 2;
+		nonleafNodeSize = M;
+		root = new PCRStarNode(this);
 	}
 
     public int m = 2; // lower limit of children in node

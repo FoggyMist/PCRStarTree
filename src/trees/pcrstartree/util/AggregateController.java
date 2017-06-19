@@ -58,22 +58,30 @@ public class AggregateController {
 			})
 		);
 
-		defaultController = new AggregateController(defaultAggregateMap);
+		defaultController = new AggregateController(defaultAggregateMap, null);
 	}
 
-	public AggregateController(HashMap<String, Aggregate> aggregateMap) {
+	public AggregateController(
+		HashMap<String, Aggregate> aggregateMap,
+		DefaultHashMap<String, Boolean> activeAggregates
+	) {
 		this.aggregateMap = new HashMap<>();
 		for (Map.Entry<String, Aggregate> aggregate : aggregateMap.entrySet()) {
-			this.aggregateMap.put(aggregate.getKey(), new Aggregate(aggregate.getValue()));
+			if(activeAggregates == null || activeAggregates.get(aggregate.getKey()) != null) {
+				this.aggregateMap.put(aggregate.getKey(), new Aggregate(aggregate.getValue()));
+			}
 		}
 	}
 
-	public AggregateController(AggregateController aggregateController) {
-		this(aggregateController.aggregateMap);
+	public AggregateController(
+		AggregateController aggregateController,
+		DefaultHashMap<String, Boolean> activeAggregates
+	) {
+		this(aggregateController.aggregateMap, activeAggregates);
 	}
 
-	public AggregateController() {
-		this(defaultController);
+	public AggregateController(DefaultHashMap<String, Boolean> activeAggregates) {
+		this(defaultController, activeAggregates);
 	}
 
 	public void update(PCRStarNode node) {

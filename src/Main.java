@@ -20,7 +20,6 @@ public class Main {
 		}
 
         PCRStarTree tree = new PCRStarTree(2, 4, new Vector<>(Arrays.asList(args).subList(1, args.length)));
-        PCRStarTree sortedInsertTree = new PCRStarTree(2, 4);
 
         int storedIndex = -1;
         Rectangle storedRect = null;
