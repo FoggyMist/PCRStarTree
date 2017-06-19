@@ -10,11 +10,6 @@ import trees.pcrstartree.util.Aggregate;
 public class PCRStarNode implements Serializable {
     public static Random rng = new Random();
     public static int pointerByteSize = 2;
-    public static int childrenNodeByteSize = 22; // 4 length + 9x2 adresses
-    // parentPointer, childrenNodes, index, treePointer, value, rectangle,
-    // overflowTreatment, depth = 2x pointers, 2x int, 1x double 1x full vector/array
-    // = 2x2 + 2x4 + 8 + (4 + 2x tree.leafNodeSize+1) = 20 + (4 + 9x2) = 42
-    public static int byteSize = 50;
     public static int uniqueNodeId = -1;
 
 	public AggregateController aggregateController;
@@ -22,8 +17,9 @@ public class PCRStarNode implements Serializable {
     public Double getValue() { return value; }
     public void setValue(double newVal) {
         value = new Double(newVal);
-        // updateAggregates()
-        // parent.updateAggregates()
+        if(parent != null) {
+            parent.aggregateController.update(parent);
+        }
     }
 
     public PCRStarNode(PCRStarTree t, int id, double val) {
@@ -35,7 +31,7 @@ public class PCRStarNode implements Serializable {
         writeCount.put(index, 0);
         readByte.put(index, 0);
         writeByte.put(index, 0);
-        writting(byteSize);
+        writting(tree.byteSize);
 
         if(id < 0) { // negative index -> structural node
             aggregateController = new AggregateController(t.activeAggregates);
@@ -124,7 +120,7 @@ public class PCRStarNode implements Serializable {
             System.out.println("overflowTreatmentCount < 0 assert failed");
         }
 
-        reading(childrenNodeByteSize);
+        reading(tree.childrenNodeByteSize);
         PCRStarNode splitResult = null;
 
         overflowTreatmentCount += 1;
@@ -146,6 +142,9 @@ public class PCRStarNode implements Serializable {
             PCRStarNode transferNode = childrenNodes.get(splitIndex);
             childrenNodes.remove(transferNode);
             updateAggregates(transferNode, -1);
+            if(aggregateController != null) {
+                aggregateController.update(this);
+            }
             splitNode.add(transferNode);
         }
 
@@ -161,6 +160,9 @@ public class PCRStarNode implements Serializable {
             PCRStarNode transferNode = childrenNodes.get(i);
             childrenNodes.remove(transferNode);
             updateAggregates(transferNode, -1);
+            if(aggregateController != null) {
+                aggregateController.update(this);
+            }
             reinsertList.add(transferNode);
         }
 
@@ -309,7 +311,7 @@ public class PCRStarNode implements Serializable {
             PCRStarNode smallestOverlapNode = null;
             // choose the entry in (node) whose rectangle needs
             // least overlap enlargement to include the new data rectangle
-            node.reading(childrenNodeByteSize);
+            node.reading(tree.childrenNodeByteSize);
             for(PCRStarNode child : node.childrenNodes) {
                 child.reading(Rectangle.byteSize);
                 double currentOverlapValue = child.overlap(r);
@@ -340,7 +342,7 @@ public class PCRStarNode implements Serializable {
             // to include the new data rectangle
             double smallestEnlargementValue = Double.POSITIVE_INFINITY;
             PCRStarNode smallestEnlargementNode = null;
-            node.reading(childrenNodeByteSize);
+            node.reading(tree.childrenNodeByteSize);
             for(PCRStarNode child : node.childrenNodes) {
                 child.reading(Rectangle.byteSize);
                 double currentEnlargement = Rectangle.enlarge(child.mbr, r).area() - child.mbr.area();
@@ -363,7 +365,7 @@ public class PCRStarNode implements Serializable {
 
     public void condenseTree() {
         if(childrenNodes.size() > 0) {
-            reading(childrenNodeByteSize);
+            reading(tree.childrenNodeByteSize);
             Rectangle newMbr = new Rectangle(childrenNodes.get(0).mbr);
             for(PCRStarNode child : childrenNodes) {
                 child.reading(Rectangle.byteSize);
@@ -417,6 +419,9 @@ public class PCRStarNode implements Serializable {
         n.writting(pointerByteSize);
         updateMbr(n.mbr);
         updateAggregates(n, 1);
+        if(aggregateController != null) {
+            aggregateController.update(this);
+        }
     }
 
     public void addAll(Vector<PCRStarNode> nodes) {
@@ -429,6 +434,9 @@ public class PCRStarNode implements Serializable {
         childrenNodes.remove(node);
         writting(pointerByteSize + 4);
         updateAggregates(node, -1);
+        if(aggregateController != null) {
+            aggregateController.update(this);
+        }
     }
 
     private void updateAggregates(PCRStarNode transferNode, int changeDirection) {
@@ -442,15 +450,11 @@ public class PCRStarNode implements Serializable {
         if(parent != null) {
             parent.updateAggregates(transferNode, changeDirection);
         }
-
-        if(aggregateController != null) {
-            aggregateController.update(this);
-        }
     }
 
     public double overlap(Rectangle r) {
         double result = 0;
-        reading(childrenNodeByteSize);
+        reading(tree.childrenNodeByteSize);
         for(PCRStarNode child : childrenNodes) {
             child.reading(Rectangle.byteSize);
             if(r != child.mbr) {
@@ -508,7 +512,7 @@ public class PCRStarNode implements Serializable {
             }
         });
 
-        reading(childrenNodeByteSize);
+        reading(tree.childrenNodeByteSize);
         for(PCRStarNode child : childrenNodes) {
             child.reading(Rectangle.byteSize);
         }
@@ -521,7 +525,7 @@ public class PCRStarNode implements Serializable {
                 return this;
             }
 
-            reading(childrenNodeByteSize);
+            reading(tree.childrenNodeByteSize);
             for(PCRStarNode child : childrenNodes) {
                 PCRStarNode nodeFound = child.search(r);
                 if(nodeFound != null) {
@@ -538,7 +542,7 @@ public class PCRStarNode implements Serializable {
 
         reading(Rectangle.byteSize);
         if(this.mbr.isOverlapping(r)) {
-            reading(childrenNodeByteSize);
+            reading(tree.childrenNodeByteSize);
 
             if(this.isLeafNode()) {
                 for(PCRStarNode child : childrenNodes) {

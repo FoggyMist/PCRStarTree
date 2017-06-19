@@ -21,6 +21,9 @@ public class PCRStarTree {
 		this.m = m;
 		this.M = M;
 		leafNodeSize = M * 2;
+		childrenNodeByteSize += (leafNodeSize + 2) * 2;
+		byteSize += childrenNodeByteSize;
+
 		nonleafNodeSize = M;
 		root = new PCRStarNode(this);
 	}
@@ -46,6 +49,11 @@ public class PCRStarTree {
 
     public int leafNodeSize = 0;
     public int nonleafNodeSize = 0;
+	public int childrenNodeByteSize = 4; // 4 length + (Mx2+1)x2 adresses
+	// parentPointer, childrenNodes, index, treePointer, value, rectangle,
+	// overflowTreatment, depth = 2x pointers, 2x int, 1x double 1x full vector/array
+	// = 2x2 + 2x4 + 8 + (4 + 2x tree.leafNodeSize+1) = 20 + childrenNodeByteSize = 42
+	public int byteSize = 32;
 
     public void insert(int index, double value, Rectangle r) {
         PCRStarNode newNode = new PCRStarNode(this, index, value);
@@ -100,7 +108,7 @@ public class PCRStarTree {
                     }
                 }
 
-                parent.reading(PCRStarNode.childrenNodeByteSize);
+                parent.reading(childrenNodeByteSize);
                 deletingNode = null;
                 if(parent.childrenNodes.size() == 0 && deletingNode != root) {
                     deletingNode = parent;

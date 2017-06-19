@@ -47,7 +47,6 @@ public class Main {
         }
 
         // tree.delete(storedRect);
-        tree.dump();
         // System.out.println("removing: " + storedIndex + " | " + storedRect);
 
         try{
@@ -79,10 +78,12 @@ public class Main {
             System.out.println("nodes found:");
             for(PCRStarNode node : wideResults) {
                 System.out.println(node);
+                node.setValue(Double.NEGATIVE_INFINITY);
                 // System.out.println(node.parent.checkValueFor("MAX"));
                 // System.out.println(node.parent.checkValueFor("MIN"));
             }
         }
+        tree.dump();
 
     }
 }

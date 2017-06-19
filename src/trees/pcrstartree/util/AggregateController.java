@@ -85,8 +85,14 @@ public class AggregateController {
 	}
 
 	public void update(PCRStarNode node) {
-		for (Map.Entry<String, Aggregate> aggregate : aggregateMap.entrySet())
-			aggregate.getValue().update.apply(node);
+		for (Map.Entry<String, Aggregate> aggregate : aggregateMap.entrySet()) {
+			PCRStarNode targetNode = node;
+			Boolean propagate = true;
+			while(propagate && targetNode != null) {
+				propagate = aggregate.getValue().update.apply(targetNode);
+				targetNode = targetNode.parent;
+			}
+		}
 	}
 
 	public double checkValueFor(String aggregateName) {
